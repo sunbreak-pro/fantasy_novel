@@ -1,0 +1,67 @@
+# auto-writing プレイブック — chat-auto-writing の自動執筆手順
+
+作成: 2026-08-02（chat-main）。auto-writing レーンが /loop で回すときの手順の正本。旅行のしおりのように「1周で何をどの順にやるか」を先に固定しておき、セッションごとの迷いと逸脱をなくす。
+
+## 起動コマンド（作者が auto-writing worktree のセッションに貼る）
+
+```
+/loop 45m このチャットは chat-auto-writing。まず C:\Users\user\OneDrive\Desktop\dev\fantasy_novel\素材\ノート\auto-writingプレイブック.md を読み、手順どおりにループ1周（0 同期と受信確認 → 1 執筆解禁チェック → 2 執筆または準備作業を1単位 → 3 停止判定）を実行する。第1章の初稿が全話完了するか、作者の回答待ちだけになって進められる作業が無くなったら停止する
+```
+
+- 実行場所: `fantasy_novel-worktrees/auto-writing`（ブランチ `auto/writing`）で開いたセッション。
+- /loop は作者が貼る（Claude は Bash 等で実行しない）。
+- PC を閉じても回したい場合は /schedule（クラウド定期実行）へ切り替える。
+
+## 前提（毎周の共通ルール）
+
+- チャット名は `chat-auto-writing`（D-ID 略称 `autow`）。初回の周だけ `/session-start` を通して正典を復元する。
+- comm の読み書きは main チェックアウトの絶対パス `C:\Users\user\OneDrive\Desktop\dev\fantasy_novel\.claude\comm\` のみ。worktree 内のコピーは読まない・書かない。
+- 書き込みしてよい場所: `manuscript/draft/`・`素材/`・自分の comm ファイル（`outbox/chat-auto-writing.md`・`decisions/chat-auto-writing.md`）。それ以外（`設計/`・`MEMORY.md`・`.claude/rules/`・他レーンの comm）は変更しない。変更が必要なら D エントリか outbox で提案する。
+- 【未定】の設定を確定事項として本文に書かない（`writing.md` 禁止事項）。突き当たったら `decisions/README.md` の運用（D エントリに書き溜めて次の作業へ）に従う。
+- commit は自分のブランチ `auto/writing` に英語メッセージで行う。comm/ の commit はしない（chat-main の仕事）。
+
+## ループ1周の手順
+
+### 0. 同期と受信確認
+
+1. `git fetch origin` → `git merge origin/main` で最新の正典を取り込む。
+2. `decisions/ANSWERS.md` に `autow` 宛の回答が来ていないか確認する。来ていれば、自分の decisions ファイルから該当エントリを消し、その回答の反映をこの周の最優先にする。正典ファイル（`設計/`・`MEMORY.md`・`writing.md`）への反映は自分では行わず、outbox で @chat-main に依頼する。
+3. 各レーンの outbox から `@chat-auto-writing`・`@all` の新着を確認する。
+
+### 1. 執筆解禁チェック（ゲート）
+
+次に書く話について、以下がすべて YES なら 2-A（執筆）へ。ひとつでも NO なら 2-B（準備作業）へ。
+
+- 対象話の話単位分解（章設計）が正典 `設計/プロット/` に存在する。または、叩き台の採用が `ANSWERS.md` の作者回答で確定している（正典反映待ちは執筆を止めない。反映は chat-main へ依頼済みであること）。
+- 文体の方向性・話の開始/終了の型が決まっている（`writing.md` 更新済み、または `ANSWERS.md` に作者回答あり）。
+- 対象話が触れる設定（登場人物の名前・地名・事件の具体・伏線の種）に【未定】が残っていない。
+
+作者回答をもって執筆に入る場合は、回答内容と矛盾しない範囲でのみ書く。
+
+### 2-A. 執筆（1周 = 1話）
+
+1. `素材/チェックリスト/執筆前チェックリスト.md` を通す。
+2. novel-writer エージェントで初稿を書く。保存先は `manuscript/draft/part1/ch01/ep001_タイトル.md` の形式（話番号は作品全体の通し番号。第2章以降は ch02… と続ける）。見出し・表記は `writing.md` と CLAUDE.md の出力規約に従う。
+3. `/manuscript-review` を通し、指摘を修正する。面白さファースト（`prose-craft.md` Section 0）: 原則と面白さが衝突したら面白さを優先し、逸脱は `素材/参照/指摘ログ.md` に一言記録する。
+4. commit する（例: `draft(p1c1): write ep001 first draft`）。
+5. 自分の outbox に 1〜3 行で完了報告を追記する（@chat-main。話数・字数・気になった点）。
+
+### 2-B. 準備作業（ゲート不通過のとき。1周 = 1単位）
+
+自分のレーンで解禁を前に進められる作業を、上から順に一つだけ行う。すでに作成済みの成果物は作り直さない。
+
+1. **文体サンプル**: 第1話冒頭の書き比べ（2〜3案・各 800〜1,200 字）を `素材/ノート/文体サンプル_第1話冒頭.md` に作り、文体の方向性の選定を D エントリで依頼する。
+2. **話の開始/終了の型の推奨案**: 案と推奨理由を添えて D エントリ化する。
+3. **第1章の章設計叩き台**: novel-author エージェントで `素材/ノート/第1章設計叩き台.md` に作る（非正典）。謎の答え・キャラ未定に依存する箇所は埋めずに【未定】と明記して穴のまま残す。完成したら outbox で @chat-story に正典化の検討を、@chat-main に作者への確認を依頼する。
+4. **他レーン依存の確認**: 謎の答え（story レーン）・孤児仲間と c-004 の肉付け（characters レーン）の進みを outbox で確認し、必要なら依頼を残す。自分では作らない（レーン越境しない）。
+
+### 3. 停止判定
+
+- 第1章の全話の初稿が揃った → 停止を宣言し、outbox に完了報告と PR の提案を残す。
+- 作者の回答待ちだけになり、2-B の残り作業も無い → 停止し、未回答の D-ID 一覧を最終報告に載せる。
+- 同じ作業単位が2周連続で失敗した → 停止し、状況を報告する。
+
+## PR 運用
+
+- commit は話単位で `auto/writing` に積む。PR（auto/writing → main）は章の完了時、または作者の指示があったときに出す。
+- 叩き台の正典昇格と `writing.md` の【未定】解消は、作者の回答後に chat-main / 担当レーンが行う。auto-writing は提案まで。

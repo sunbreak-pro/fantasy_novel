@@ -8,7 +8,7 @@
 | --------------------------------------- | ---------------------- | ------------------------------------------------------------------------- |
 | `dev/fantasy_novel`（本体）             | `main`                 | オーケストレーター。方針決定・PR の集約・MEMORY.md の更新はここに集約する |
 | `fantasy_novel-worktrees/characters`    | `design/characters`    | キャラクター設定（c-004 肉付け・新キャラ三人・ガルド/友人の残り）         |
-| `fantasy_novel-worktrees/organizations` | `design/organizations` | 組織・社会設定（討伐同盟・教会・少年兵制度・才能社会）                    |
+| `fantasy_novel-worktrees/organizations` | `design/organizations` | 組織・社会設定（討魔同盟・教会・少年兵制度・才能社会）                    |
 | `fantasy_novel-worktrees/story`         | `design/story`         | ストーリー設定（謎の答えの先行設計・話単位分解・伏線）                    |
 | `fantasy_novel-worktrees/audit`         | `audit/consistency`    | 監査。正典間の矛盾・反映漏れの定期チェック                                |
 | `fantasy_novel-worktrees/auto-writing`  | `auto/writing`         | 自動執筆パイプライン（設計 → 執筆 → セルフレビュー → commit）             |

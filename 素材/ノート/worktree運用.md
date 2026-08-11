@@ -4,15 +4,17 @@
 
 ## 配置と役割
 
-| worktree                                | ブランチ               | 役割                                                                      |
-| --------------------------------------- | ---------------------- | ------------------------------------------------------------------------- |
-| `dev/fantasy_novel`（本体）             | `main`                 | オーケストレーター。方針決定・PR の集約・MEMORY.md の更新はここに集約する |
-| `fantasy_novel-worktrees/characters`    | `design/characters`    | キャラクター設定（c-004 肉付け・新キャラ三人・ガルド/友人の残り）         |
-| `fantasy_novel-worktrees/organizations` | `design/organizations` | 組織・社会設定（討魔同盟・教会・少年兵制度・才能社会）                    |
-| `fantasy_novel-worktrees/story`         | `design/story`         | ストーリー設定（謎の答えの先行設計・話単位分解・伏線）                    |
-| `fantasy_novel-worktrees/audit`         | `audit/consistency`    | 監査。正典間の矛盾・反映漏れの定期チェック                                |
-| `fantasy_novel-worktrees/auto-writing`  | `auto/writing`         | 自動執筆パイプライン（設計 → 執筆 → セルフレビュー → commit）             |
-| `fantasy_novel-worktrees/auto-verify`   | `auto/verify`          | 自動検証。auto/writing の成果を別コンテキストで監査                       |
+| worktree                                | ブランチ               | 役割                                                                                 |
+| --------------------------------------- | ---------------------- | ------------------------------------------------------------------------------------ |
+| `dev/fantasy_novel`（本体）             | `main`                 | オーケストレーター。方針決定・PR の集約・MEMORY.md の更新はここに集約する            |
+| `fantasy_novel-worktrees/characters`    | `design/characters`    | キャラクター設定（c-004 肉付け・新キャラ三人・ガルド/友人の残り）                    |
+| `fantasy_novel-worktrees/organizations` | `design/organizations` | 組織・社会設定（討魔同盟・教会・少年兵制度・才能社会）                               |
+| `fantasy_novel-worktrees/story`         | `design/story`         | ストーリー設定（謎の答えの先行設計・話単位分解・伏線）                               |
+| `fantasy_novel-worktrees/magic`         | `design/magic-system`  | 魔法体系（法術・魔術・魔法・ルミナ・属性。org-16 と移植プランを合流）2026-08-10 新設 |
+| `fantasy_novel-worktrees/monsters`      | `design/bestiary`      | 魔獣の生態系・種（等級との対応・現実動物＋北欧モチーフ）2026-08-10 新設              |
+| `fantasy_novel-worktrees/audit`         | `audit/consistency`    | 監査。正典間の矛盾・反映漏れの定期チェック                                           |
+| `fantasy_novel-worktrees/auto-writing`  | `auto/writing`         | 自動執筆パイプライン（設計 → 執筆 → セルフレビュー → commit）                        |
+| `fantasy_novel-worktrees/auto-verify`   | `auto/verify`          | 自動検証。auto/writing の成果を別コンテキストで監査                                  |
 
 ## 運用ルール
 
@@ -26,7 +28,7 @@
 
 レーン間の書き置き・作者への判断依頼は `.claude/comm/` 経由で行う（life-editor から移植。正本 = `.claude/comm/README.md`）。
 
-- チャット名は上の表の worktree と 1:1（`chat-main` / `chat-characters` / `chat-organizations` / `chat-story` / `chat-audit` / `chat-auto-writing` / `chat-auto-verify`）。
+- チャット名は上の表の worktree と 1:1（`chat-main` / `chat-characters` / `chat-organizations` / `chat-story` / `chat-magic` / `chat-monsters` / `chat-audit` / `chat-auto-writing` / `chat-auto-verify`）。
 - 読み書きは必ず main チェックアウト（`dev/fantasy_novel/.claude/comm/`）の絶対パス。worktree 内のコピーはブランチ差で古いため使わない。
 - 連絡 = 自分の `outbox/chat-<自分>.md` に降順追記。作者判断待ち = `decisions/chat-<自分>.md` に書き溜めて次の作業へ（回答は `decisions/ANSWERS.md` に届く）。
 - comm/ の commit は chat-main が区切りでまとめて行う（他レーンは commit しない）。

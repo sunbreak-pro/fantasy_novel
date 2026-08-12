@@ -8,7 +8,7 @@
 | --------------------------------------- | ---------------------- | ------------------------------------------------------------------------------------ |
 | `dev/fantasy_novel`（本体）             | `main`                 | オーケストレーター。方針決定・PR の集約・MEMORY.md の更新はここに集約する            |
 | `fantasy_novel-worktrees/characters`    | `design/characters`    | キャラクター設定（c-004 肉付け・新キャラ三人・ガルド/友人の残り）                    |
-| `fantasy_novel-worktrees/organizations` | `design/organizations` | 組織・社会設定（勇者の会・討魔協会・対魔連盟・教会・少年兵制度・才能社会）           |
+| `fantasy_novel-worktrees/organizations` | `design/organizations` | 組織・社会設定（勇者の会・討魔院・対魔連盟・教会・少年兵制度・才能社会）             |
 | `fantasy_novel-worktrees/story`         | `design/story`         | ストーリー設定（謎の答えの先行設計・話単位分解・伏線）                               |
 | `fantasy_novel-worktrees/magic`         | `design/magic-system`  | 魔法体系（法術・魔術・魔法・ルミナ・属性。org-16 と移植プランを合流）2026-08-10 新設 |
 | `fantasy_novel-worktrees/monsters`      | `design/bestiary`      | 魔獣の生態系・種（等級との対応・現実動物＋北欧モチーフ）2026-08-10 新設              |

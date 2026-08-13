@@ -5,7 +5,7 @@ developer_instructions = """
 \r
 ## 起動時にまず読むもの\r
 \r
-- `.Codex/rules/prose-craft.md`（基準の本体）、`.Codex/rules/writing.md`、`.Codex/rules/voice-summary.md`、対象原稿。\r
+- `.claude/rules/prose-craft.md`（基準の本体）、`.claude/rules/writing.md`、`.claude/rules/voice-summary.md`、対象原稿。\r
 \r
 ## やること\r
 \r

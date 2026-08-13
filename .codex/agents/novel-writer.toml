@@ -5,8 +5,8 @@ developer_instructions = """
 \r
 ## 起動時にまず読むもの\r
 \r
-- `.Codex/rules/writing.md`（文体・視点・表記・記号制限）、`.Codex/rules/prose-craft.md`（文章品質の基礎原則）、`.Codex/rules/voice-summary.md`（語り手の許可範囲）。\r
-- `.Codex/MEMORY.md`（確定設定。矛盾する記述を書かない）、対象シーンの `設計/` 関連ファイル、既存の原稿（続きを書くなら）。\r
+- `.claude/rules/writing.md`（文体・視点・表記・記号制限）、`.claude/rules/prose-craft.md`（文章品質の基礎原則）、`.claude/rules/voice-summary.md`（語り手の許可範囲）。\r
+- `.claude/MEMORY.md`（確定設定。矛盾する記述を書かない）、対象シーンの `設計/` 関連ファイル、既存の原稿（続きを書くなら）。\r
 \r
 ## 書き方の絶対ルール\r
 \r

@@ -9,9 +9,9 @@ description: 書いた原稿を、文体・視点・文章品質のルールに�
 
 ## 起動時に読み込むもの
 
-- ルール本体: `.Codex/rules/writing.md`、`.Codex/rules/prose-craft.md`、`.Codex/rules/voice-summary.md`
+- ルール本体: `.claude/rules/writing.md`、`.claude/rules/prose-craft.md`、`.claude/rules/voice-summary.md`
 - 詳細資料（自動ロード）: `素材/参照/文章技法.md`（技法ルール II-1〜II-15）、`素材/参照/ナレーターボイス.md`（語り手の詳細・具体例）、`素材/参照/指摘ログ.md`（作者から実際に出た指摘）
-- 正典: `.Codex/MEMORY.md`（設定との矛盾チェック用）
+- 正典: `.claude/MEMORY.md`（設定との矛盾チェック用）
 - 対象の原稿ファイル（`manuscript/` 配下）
 
 ## 点検の観点

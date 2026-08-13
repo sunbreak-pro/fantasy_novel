@@ -10,13 +10,13 @@ description: セッション開始時（/clear 後や作業再開時）に、確
 ## 手順
 
 1. **正典と履歴を読む**
-   - `.Codex/MEMORY.md`（確定設定の正典＋タスクトラッカー）
-   - `.Codex/HISTORY.md`（直近の変更ログ・章サマリー）
-   - 必要なら `.Codex/AGENTS.md`（原則・視点の再確認）
+   - `.claude/MEMORY.md`（確定設定の正典＋タスクトラッカー）
+   - `.claude/HISTORY.md`（直近の変更ログ・章サマリー）
+   - 必要なら `AGENTS.md`（リポジトリ直下・原則・視点の再確認）
 
-2. **並行チャットの書き置きを確認する**（プロトコル → `.Codex/comm/README.md`）
+2. **並行チャットの書き置きを確認する**（プロトコル → `.claude/comm/README.md`）
    - チャット名（`chat-<レーン名>`）を確認する。担当レーンが不明ならユーザーに確認する。
-   - main チェックアウト（`dev/fantasy_novel/.Codex/comm/`）の outbox から自分宛（`@chat-<自分>`・`@all`）の最新エントリを確認する。worktree 内のコピーは読まない。
+   - main チェックアウト（`dev/fantasy_novel/.claude/comm/`）の outbox から自分宛（`@chat-<自分>`・`@all`）の最新エントリを確認する。worktree 内のコピーは読まない。
    - `comm/decisions/ANSWERS.md` に自分の D-ID への回答が来ていれば、該当エントリを自分の decisions ファイルから消して着手候補に載せる。
 
 3. **進捗サマリーを提示する**（結論先出し・簡潔に）

@@ -56,6 +56,8 @@
 | `chat-characters`    | `design/characters`               | char      |
 | `chat-organizations` | `design/organizations`            | org       |
 | `chat-story`         | `design/story`                    | story     |
+| `chat-magic`         | `design/magic-system`             | magic     |
+| `chat-monsters`      | `design/bestiary`                 | mon       |
 | `chat-audit`         | `audit/consistency`               | audit     |
 | `chat-auto-writing`  | `auto/writing`                    | autow     |
 | `chat-auto-verify`   | `auto/verify`                     | autov     |

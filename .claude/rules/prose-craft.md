@@ -1,3 +1,9 @@
+---
+paths:
+  - "manuscript/**"
+  - "素材/参照/**"
+---
+
 # prose-craft.md — 文章品質の原則と技法
 
 小説本文の品質を担保する、具体的で数値的な line-editing の基準。**適用の順序は Section 0 が前提。Section I（基礎原則）は推敲段階で全シーンに適用**する。Section II（技法ルール II-1〜II-15）は `素材/参照/文章技法.md` に置き、`/manuscript-review` スキル起動時に自動ロードする。

@@ -1,0 +1,1434 @@
+<title>継承者クロニクル</title>
+<style>
+:root{
+  --ground:#E8EAE6; --surface:#FBFBF8; --surface-2:#F0F1EC; --ink:#1F232A; --muted:#5E6670; --line:#CDD1CB; --line-strong:#A9AFA8;
+  --lamp:#B3651B; --lamp-soft:#F4E5D0; --lamp-ink:#7E4610;
+  --steel:#35618B; --steel-soft:#DEE7F0;
+  --moss:#4E7A4B; --moss-soft:#E0EADC;
+  --slate:#6E7580; --slate-soft:#E5E7E9;
+  --teal:#2A7E7A; --teal-soft:#D8ECEA;
+  --indigo:#4A5480; --indigo-soft:#E0E3EF;
+  --on-accent:#FFFFFF; --shadow:0 1px 2px rgba(20,24,30,.06);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --ground:#15181C; --surface:#1E2227; --surface-2:#262B31; --ink:#E7E5DF; --muted:#A3A9B0; --line:#383E46; --line-strong:#515863;
+    --lamp:#DE9A50; --lamp-soft:#3A2C1B; --lamp-ink:#F1C489;
+    --steel:#86ADD8; --steel-soft:#1F3040;
+    --moss:#93C08B; --moss-soft:#22331F;
+    --slate:#A0A6B0; --slate-soft:#2B3036;
+    --teal:#68C1BB; --teal-soft:#1B3634;
+    --indigo:#9AA6DD; --indigo-soft:#272C46;
+    --on-accent:#15181C; --shadow:0 1px 2px rgba(0,0,0,.4);
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#15181C; --surface:#1E2227; --surface-2:#262B31; --ink:#E7E5DF; --muted:#A3A9B0; --line:#383E46; --line-strong:#515863;
+  --lamp:#DE9A50; --lamp-soft:#3A2C1B; --lamp-ink:#F1C489;
+  --steel:#86ADD8; --steel-soft:#1F3040;
+  --moss:#93C08B; --moss-soft:#22331F;
+  --slate:#A0A6B0; --slate-soft:#2B3036;
+  --teal:#68C1BB; --teal-soft:#1B3634;
+  --indigo:#9AA6DD; --indigo-soft:#272C46;
+  --on-accent:#15181C; --shadow:0 1px 2px rgba(0,0,0,.4);
+}
+
+*,*::before,*::after{box-sizing:border-box}
+[hidden]{display:none!important}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion: reduce){ html{scroll-behavior:auto} *{transition:none!important} }
+body{
+  margin:0; background:var(--ground); color:var(--ink);
+  font-family:"Hiragino Sans","Hiragino Kaku Gothic ProN","Yu Gothic UI","Yu Gothic","Meiryo","Noto Sans JP",system-ui,sans-serif;
+  font-size:15px; line-height:1.75; -webkit-font-smoothing:antialiased;
+  font-feature-settings:"palt";
+}
+.serif, h1, h2, h3, h4{ font-family:"Hiragino Mincho ProN","Hiragino Mincho Pro","Yu Mincho","YuMincho","Noto Serif JP","Source Han Serif JP",serif; font-weight:600; text-wrap:balance; letter-spacing:.01em }
+.mono, .cid, .fid, .num, .year, .through{ font-family:ui-monospace,"Cascadia Mono","SFMono-Regular",Consolas,"Liberation Mono",monospace; font-variant-numeric:tabular-nums }
+a{color:var(--steel)} a:focus-visible, button:focus-visible{outline:2px solid var(--lamp); outline-offset:2px}
+button{font:inherit; color:inherit; cursor:pointer}
+.wrap{max-width:1140px; margin:0 auto; padding:0 20px}
+.eyebrow{font-size:12px; letter-spacing:.12em; text-transform:uppercase; color:var(--muted)}
+.tag{display:inline-block; font-size:12px; padding:0 .5em; border:1px solid var(--line-strong); border-radius:3px; color:var(--muted); line-height:1.7; vertical-align:middle}
+
+/* ---- head ---- */
+.hero{padding:44px 0 26px; border-bottom:1px solid var(--line)}
+.hero h1{font-size:clamp(30px,4.4vw,44px); margin:.25em 0 .1em; line-height:1.2}
+.hero .sub{margin:0; color:var(--muted); font-size:15px}
+.facts{display:grid; grid-template-columns:repeat(auto-fit,minmax(min(220px,100%),1fr)); gap:14px; margin:22px 0 0}
+.facts > div{background:var(--surface); border:1px solid var(--line); padding:12px 14px; box-shadow:var(--shadow)}
+.facts dt{font-size:12px; color:var(--muted); letter-spacing:.08em}
+.facts dd{margin:.2em 0 0; font-size:15px}
+.facts .closing{font-family:"Hiragino Mincho ProN","Yu Mincho","YuMincho","Noto Serif JP",serif; font-size:18px}
+
+/* ---- toolbar ---- */
+.toolbar{position:sticky; top:0; z-index:20; background:var(--ground); border-bottom:1px solid var(--line); padding:8px 0}
+.toolbar .wrap{display:flex; flex-wrap:wrap; align-items:center; gap:8px 18px}
+.nav{display:flex; flex-wrap:wrap; gap:2px 14px; font-size:13px}
+.nav a{color:var(--muted); text-decoration:none; padding:2px 0; border-bottom:1px solid transparent}
+.nav a:hover{color:var(--ink); border-bottom-color:var(--line-strong)}
+.pf{display:flex; gap:0; margin-left:auto; border:1px solid var(--line-strong); border-radius:4px; overflow:hidden}
+.pf button{background:var(--surface); border:0; border-right:1px solid var(--line-strong); padding:4px 12px; font-size:13px; color:var(--muted)}
+.pf button:last-child{border-right:0}
+.pf button[aria-pressed="true"]{background:var(--ink); color:var(--surface)}
+.hlbar{width:100%; display:flex; flex-wrap:wrap; align-items:center; gap:8px 14px; font-size:13px; padding:6px 10px; background:var(--lamp-soft); border:1px solid var(--lamp); border-radius:4px}
+.hlbar b{font-weight:600}
+.hlbar .count{color:var(--muted)}
+.hlbar button, .hlbar a{margin-left:auto; background:transparent; border:1px solid var(--lamp); border-radius:3px; padding:1px 10px; color:var(--lamp-ink); text-decoration:none}
+.hlbar a{margin-left:0}
+
+/* ---- sections ---- */
+section.sec{padding:40px 0 8px}
+section.sec > .wrap > h2{font-size:26px; margin:0 0 6px; display:flex; align-items:baseline; gap:12px}
+section.sec > .wrap > h2 .eyebrow{font-family:inherit}
+.lead{color:var(--muted); margin:0 0 20px; max-width:70ch}
+
+/* ---- boss ---- */
+.boss-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(min(440px,100%),1fr)); gap:16px}
+.panel{background:var(--surface); border:1px solid var(--line); padding:16px 18px; box-shadow:var(--shadow)}
+.panel h3{font-size:16px; margin:0 0 10px; padding-bottom:6px; border-bottom:1px solid var(--line)}
+.layers{margin:0; padding:0; list-style:none; display:grid; gap:10px}
+.layers li{display:grid; grid-template-columns:7.5em 1fr; gap:2px 12px; font-size:14px}
+.layers .lname{color:var(--muted); font-size:12px; letter-spacing:.04em; padding-top:.2em}
+.layers .who{font-weight:600}
+.layers .where{color:var(--muted); font-size:13px}
+.layers .where::before{content:"退場 "; letter-spacing:.06em}
+.steps{margin:0; padding:0; list-style:none; counter-reset:s; display:grid; gap:8px}
+.steps li{display:grid; grid-template-columns:2.2em 1fr; gap:8px; font-size:14px; counter-increment:s}
+.steps li::before{content:counter(s); font-family:ui-monospace,Consolas,monospace; color:var(--lamp); font-size:18px; line-height:1.3; text-align:right}
+.steps .where{color:var(--muted); font-size:12px; margin-left:.5em}
+.steps b{font-weight:600}
+.mirror{margin:0; padding:0; list-style:none; display:grid; gap:8px; font-size:14px}
+.mirror li{padding-left:1em; text-indent:-1em}
+.mirror li::before{content:"—"; margin-right:.4em; color:var(--lamp)}
+.stairs{margin:0; padding:0; list-style:none; display:grid; gap:8px; font-size:14px}
+.stairs li{display:grid; grid-template-columns:3em 1fr; gap:8px; align-items:baseline}
+.stairs .p{font-family:"Hiragino Mincho ProN","Yu Mincho","YuMincho","Noto Serif JP",serif; font-size:18px; color:var(--lamp)}
+.stairs .arrow{color:var(--lamp); margin:0 .3em}
+.stairs .chs{color:var(--muted); font-size:12px; display:block}
+.note{font-size:13px; color:var(--muted); margin:12px 0 0}
+
+/* ---- anchors strip ---- */
+.anchors{background:var(--surface); border:1px solid var(--line); padding:10px 14px; font-size:13px; margin:0 0 22px; display:flex; flex-wrap:wrap; gap:4px 0; align-items:center}
+.anchors .lbl{color:var(--muted); margin-right:12px; letter-spacing:.06em}
+.anchors span.a{white-space:nowrap}
+.anchors span.a + span.a::before{content:"→"; color:var(--lamp); margin:0 .5em}
+
+/* ---- legend ---- */
+.legend{display:flex; flex-wrap:wrap; gap:6px 18px; font-size:12px; color:var(--muted); margin:0 0 18px; align-items:center}
+.legend .g{display:inline-flex; align-items:center; gap:6px}
+
+/* ---- timeline ---- */
+.part{margin:26px 0 8px}
+.part-head{display:grid; grid-template-columns:64px 1fr; gap:16px; align-items:start; padding:14px 0 14px; border-top:2px solid var(--ink)}
+.part-stage{font-family:"Hiragino Mincho ProN","Yu Mincho","YuMincho","Noto Serif JP",serif; font-size:44px; line-height:1; color:var(--lamp); text-align:center; padding-top:2px}
+.part-head h3{font-size:22px; margin:0 0 4px}
+.part-count{font-family:inherit; font-size:13px; color:var(--muted); font-weight:400; margin-left:.8em}
+.part-q, .part-line{margin:0; font-size:14px}
+.part-q span, .part-line span{display:inline-block; font-size:11px; color:var(--muted); letter-spacing:.08em; margin-right:.8em; border:1px solid var(--line-strong); padding:0 .4em; border-radius:2px; vertical-align:middle}
+.chapters{list-style:none; margin:0; padding:0; display:grid; gap:14px}
+.ch{display:grid; grid-template-columns:64px 1fr; gap:16px; position:relative; transition:opacity .15s}
+.ch::before{content:""; position:absolute; left:31px; top:0; bottom:-14px; width:2px; background:var(--line)}
+.ch:last-child::before{bottom:0}
+.rail{position:relative; display:flex; flex-direction:column; align-items:center; gap:2px; padding-top:10px}
+.num{position:relative; z-index:1; width:36px; height:36px; border-radius:50%; display:grid; place-items:center; background:var(--surface); border:2px solid var(--ink); font-size:14px; font-weight:600}
+.age{font-size:12px; text-align:center; line-height:1.3; margin-top:4px; white-space:nowrap}
+.year{font-size:11px; color:var(--muted); text-align:center; line-height:1.3; white-space:nowrap}
+.card{background:var(--surface); border:1px solid var(--line); border-left:3px solid var(--line-strong); padding:14px 18px 12px; box-shadow:var(--shadow)}
+.card-head{display:flex; flex-wrap:wrap; align-items:baseline; gap:4px 14px; margin-bottom:6px}
+.chlabel{font-size:12px; color:var(--muted); letter-spacing:.06em}
+.through{margin-left:.6em; color:var(--muted); font-size:11px}
+.card h4{font-size:20px; margin:0; display:flex; flex-wrap:wrap; align-items:baseline; gap:10px}
+.status{font-family:"Hiragino Sans","Yu Gothic UI","Meiryo",sans-serif; font-size:12px; font-weight:400; color:var(--muted)}
+.sum{margin:0 0 10px; font-size:14px; line-height:1.8; max-width:78ch}
+.meta{margin:0; display:grid; gap:5px; font-size:13px}
+.meta .row{display:grid; grid-template-columns:5em 1fr; gap:8px; align-items:start}
+.meta dt{color:var(--muted); font-size:11px; letter-spacing:.08em; padding-top:.35em}
+.meta dd{margin:0}
+.kari-text{color:var(--muted)}
+.scenery{margin:4px 0 0; font-size:12px; color:var(--muted)}
+.chips, .fbs{display:flex; flex-wrap:wrap; gap:5px}
+
+/* chips */
+.chip{display:inline-flex; align-items:center; gap:.35em; border:1px solid; border-radius:3px; padding:1px 7px 1px 6px; font-size:12px; line-height:1.6; background:var(--surface-2); max-width:100%}
+.chip .cid{font-size:11px; opacity:.85}
+.chip .cnote{display:none}
+.chip.t-main{background:var(--ink); color:var(--surface); border-color:var(--ink)}
+.chip.t-major{background:var(--steel-soft); color:var(--steel); border-color:var(--steel)}
+.chip.t-key{background:var(--moss-soft); color:var(--moss); border-color:var(--moss)}
+.chip.t-sub{background:var(--slate-soft); color:var(--slate); border-color:var(--slate)}
+.chip.t-new{background:var(--teal-soft); color:var(--teal); border-color:var(--teal); border-style:dashed}
+.mk{font-style:normal; font-size:10px; line-height:1.4; padding:0 .3em; border-radius:2px; background:var(--surface); color:var(--ink); border:1px solid currentColor}
+.chip.t-main .mk{background:var(--surface); color:var(--ink)}
+.mk-death{background:var(--ink); color:var(--surface); border-color:var(--ink); font-size:12px; padding:0 .35em}
+.chip.t-main .mk-death{background:var(--surface); color:var(--ink)}
+.mk-kari{border-style:dashed}
+.chip.hit{box-shadow:0 0 0 2px var(--lamp); }
+.chip[aria-pressed="true"]{box-shadow:0 0 0 2px var(--lamp)}
+
+/* foreshadow badges */
+.fb{display:inline-flex; align-items:center; gap:.35em; border:1px solid var(--lamp); border-radius:3px; padding:1px 7px 1px 6px; font-size:12px; line-height:1.6; color:var(--lamp-ink); background:var(--surface)}
+.fb .fsym{font-size:11px}
+.fb .fkind{font-size:10px; letter-spacing:.06em; opacity:.9}
+.fb .flbl{font-size:11px; opacity:.85; border-left:1px solid var(--lamp); padding-left:.4em}
+.fb .fkari{font-size:10px; border:1px dashed var(--lamp); padding:0 .3em; border-radius:2px}
+.fb.k-mid{background:var(--lamp-soft)}
+.fb.k-get{background:var(--lamp); color:var(--on-accent); border-color:var(--lamp)}
+.fb.k-get .flbl{border-left-color:rgba(255,255,255,.5)}
+.fb.k-get .fkari{border-color:rgba(255,255,255,.7)}
+.fb.hit{box-shadow:0 0 0 2px var(--ink)}
+.fb[aria-pressed="true"]{box-shadow:0 0 0 2px var(--ink)}
+
+/* wave */
+.wave{display:inline-flex; align-items:center; gap:.3em; margin-right:.7em; font-size:12px; padding:0 .5em; border-radius:3px; border:1px solid}
+.wave b{font-weight:600; font-size:14px}
+.w-up{color:var(--lamp-ink); border-color:var(--lamp); background:var(--lamp-soft)}
+.w-down{color:var(--indigo); border-color:var(--indigo); background:var(--indigo-soft)}
+.w-flat{color:var(--muted); border-color:var(--line-strong); background:var(--surface-2)}
+
+/* highlight states */
+.ch.dim{opacity:.32}
+.ch.hit .card{border-left-color:var(--lamp)}
+.ch.hit .num{border-color:var(--lamp); background:var(--lamp-soft)}
+
+/* band */
+.band{margin:18px 0 6px 0; padding:12px 18px 12px 18px; background:var(--surface-2); border:1px dashed var(--line-strong); border-left:3px solid var(--ink)}
+.band h4{font-size:15px; margin:0 0 6px; display:flex; flex-wrap:wrap; gap:10px; align-items:baseline}
+.band h4 span{font-family:inherit; font-weight:400; font-size:12px; color:var(--muted)}
+.band ul{margin:0; padding-left:1.2em; font-size:13px; display:grid; gap:2px}
+.jump{display:grid; grid-template-columns:64px 1fr; gap:16px; align-items:center; margin:6px 0 10px}
+.jump .rail{padding-top:0}
+.jump .num{border-style:dashed; border-color:var(--line-strong); background:var(--ground); font-size:11px; color:var(--muted)}
+.jump p{margin:0; font-size:13px; color:var(--muted); border-top:1px dashed var(--line-strong); border-bottom:1px dashed var(--line-strong); padding:6px 0}
+
+/* ---- tables ---- */
+.scroll{overflow-x:auto; background:var(--surface); border:1px solid var(--line); box-shadow:var(--shadow)}
+table{border-collapse:collapse; width:100%; font-size:13px}
+th, td{padding:8px 10px; border-bottom:1px solid var(--line); vertical-align:top; text-align:left}
+thead th{font-size:11px; letter-spacing:.08em; color:var(--muted); font-weight:500; background:var(--surface-2); position:sticky; top:0; white-space:nowrap}
+tbody tr:last-child td, tbody tr:last-child th{border-bottom:0}
+tbody th{font-weight:500}
+
+/* foreshadow map */
+.fmap{min-width:920px}
+.fmap th[scope="row"]{white-space:nowrap}
+.fname{background:var(--surface); border:1px solid var(--lamp); color:var(--lamp-ink); border-radius:3px; padding:1px 8px; font-family:ui-monospace,Consolas,monospace; font-size:12px}
+.fname[aria-pressed="true"]{background:var(--lamp); color:var(--on-accent)}
+.fmap .fbody{font-weight:500; min-width:14em}
+.fmap .f-set, .fmap .f-mid, .fmap .f-get{min-width:14em}
+.fmap .f-set::before, .fmap .f-mid::before, .fmap .f-get::before{font-size:11px; color:var(--lamp); margin-right:.4em}
+.fmap .f-set::before{content:"○"} .fmap .f-mid::before{content:"→"} .fmap .f-get::before{content:"●"}
+.fmap td.none::before{content:""; margin:0}
+.fmap .f-st{white-space:nowrap; color:var(--muted)}
+.fmap tr[data-f].hit th, .fmap tr[data-f].hit td{background:var(--lamp-soft)}
+.open{margin:16px 0 0; display:grid; grid-template-columns:repeat(auto-fit,minmax(min(300px,100%),1fr)); gap:16px}
+.open .panel ul{margin:0; padding-left:1.2em; font-size:13px}
+
+/* matrix */
+.matrix{min-width:980px}
+.matrix th[scope="row"]{white-space:nowrap; min-width:15em}
+.mname{background:transparent; border:0; padding:0; text-align:left; display:inline-flex; gap:.5em; align-items:baseline; border-bottom:1px solid transparent}
+.mname:hover{border-bottom-color:var(--line-strong)}
+.mname .cid{font-size:11px; color:var(--muted)}
+.matrix .tier{display:block; font-size:10px; letter-spacing:.06em; color:var(--muted); margin-top:1px}
+.matrix tr.t-main .cname{font-weight:600}
+.matrix tr.t-major .cid, .matrix tr.t-major .tier{color:var(--steel)}
+.matrix tr.t-key .cid, .matrix tr.t-key .tier{color:var(--moss)}
+.matrix tr.t-new .cid, .matrix tr.t-new .tier{color:var(--teal)}
+.mcell{min-width:152px}
+.strip{display:flex; gap:2px}
+.cell{width:18px; height:18px; border:1px solid var(--line); border-radius:2px; background:var(--surface-2); display:grid; place-items:center; font-size:10px; line-height:1; color:var(--surface)}
+.cell.on{background:var(--ink); border-color:var(--ink)}
+.cell.on.first{background:var(--surface); color:var(--ink); border:2px solid var(--ink)}
+.cell.on.death{background:var(--ink); color:var(--surface); font-size:13px}
+.cell.on.exit{background:var(--surface); color:var(--ink); border:1px solid var(--ink); border-right-width:4px}
+.cell.on.kari{background:var(--surface-2); border:1px dashed var(--ink); color:var(--ink)}
+.cell.on.first.kari{border:2px dashed var(--ink); background:var(--surface-2)}
+.cell.on.exit.kari{border-style:dashed}
+.mrole{font-size:12px; min-width:22em}
+.mappear{display:block; color:var(--muted); font-size:11px; margin-top:2px}
+.matrix tr[data-char].hit th, .matrix tr[data-char].hit td{background:var(--lamp-soft)}
+.matrix thead .pt{text-align:center}
+.matrix thead .pt small{display:block; font-size:10px; letter-spacing:0; color:var(--muted)}
+.mlegend{display:flex; flex-wrap:wrap; gap:6px 16px; font-size:12px; color:var(--muted); margin:10px 0 0; align-items:center}
+.mlegend .g{display:inline-flex; align-items:center; gap:5px}
+
+/* kari table */
+.kari-table{min-width:860px}
+.kari-table td:first-child, .kari-table th:first-child{white-space:nowrap; color:var(--muted); font-family:ui-monospace,Consolas,monospace}
+.kari-table td:nth-child(2){font-weight:500; min-width:18em}
+
+/* footer */
+footer{padding:36px 0 60px; border-top:1px solid var(--line); margin-top:36px; font-size:13px; color:var(--muted)}
+footer h2{font-size:16px; margin:0 0 8px; color:var(--ink)}
+footer ul{margin:0 0 12px; padding-left:1.2em; columns:2; column-gap:32px}
+footer li{break-inside:avoid}
+footer code{font-family:ui-monospace,Consolas,monospace; font-size:12px; color:var(--ink)}
+
+@media (max-width:720px){
+  .hero{padding:30px 0 18px}
+  .part-head, .ch, .jump{grid-template-columns:48px 1fr; gap:10px}
+  .ch::before{left:23px}
+  .num{width:30px; height:30px; font-size:12px}
+  .age{font-size:11px}
+  .year{font-size:10px}
+  .part-stage{font-size:32px}
+  .meta .row{grid-template-columns:1fr; gap:0}
+  .layers li{grid-template-columns:1fr}
+  footer ul{columns:1}
+}
+
+.js tr[data-char], .js tr[data-f]{cursor:pointer}
+</style>
+
+<header class="hero">
+  <div class="wrap">
+    <p class="eyebrow">全体時系列の早見 · 非正典 · 2026-08-31 生成</p>
+    <h1>継承者クロニクル</h1>
+    <p class="sub">仮題未定の長編ハイファンタジー——四部の一代記・全25章を、ラスボスの構造・時系列・伏線・登場人物で一枚に見渡す。</p>
+    <dl class="facts">
+      <div><dt>作品</dt><dd>タイトル【未定】。法術に憧れる、才能のない少年テラベールの一代記。</dd></div>
+      <div><dt>規模</dt><dd>四部（起承転結）・全25章（一部6章・二部6章・三部7章・四部6章【確定方向】）・話は章あたり18〜20話目安。</dd></div>
+      <div><dt>テーマ</dt><dd>自分を愛する——体現は「今を生きる」。問いは二段: 前半「本当は何を求めているのか」（F-001）／後半「なぜ救えないと自分が壊れるのか」（F-004）。言及して伝えない。</dd></div>
+      <div><dt>締めの一文候補</dt><dd class="closing">「人々は彼らをこう呼ぶ。継承者と」</dd></div>
+    </dl>
+  </div>
+</header>
+
+<div class="toolbar">
+  <div class="wrap">
+    <nav class="nav" aria-label="ページ内">
+      <a href="#boss">ラスボスと結末</a>
+      <a href="#timeline">時系列</a>
+      <a href="#fmap">伏線マップ</a>
+      <a href="#matrix">人物×部</a>
+      <a href="#kari">仮置き一覧</a>
+      <a href="#pointer">正典ポインタ</a>
+    </nav>
+    <div class="pf" role="group" aria-label="部で絞る">
+      <button type="button" data-part="all" aria-pressed="true">全部</button>
+      <button type="button" data-part="1" aria-pressed="false">一部</button>
+      <button type="button" data-part="2" aria-pressed="false">二部</button>
+      <button type="button" data-part="3" aria-pressed="false">三部</button>
+      <button type="button" data-part="4" aria-pressed="false">四部</button>
+    </div>
+    <div class="hlbar" id="hlbar" hidden>
+      <span>強調中:</span><b id="hltext"></b><span class="count" id="hlcount"></span>
+      <a href="#timeline">年表へ</a>
+      <button type="button" id="hlclear">解除</button>
+    </div>
+  </div>
+</div>
+
+<section class="sec" id="boss">
+  <div class="wrap">
+    <h2>ラスボスとクライマックスの構造</h2>
+    <p class="lead">敵は二重。舞台の上に立つのは獣、その裏に人がいる。四部はこの二枚を順にめくり、最後に「偽物と暴いたはずのものが本物になって立つ」で返す。</p>
+    <div class="boss-grid">
+      <div class="panel">
+        <h3>敵の二重構造（舞台上の顔と、裏の顔）</h3>
+        <ul class="layers">
+          <li><span class="lname">舞台上のラスボス</span><div><span class="who">今代の災厄</span>——大襲撃のボス（主の成り果ての大狼）の側近だった獣。ボスの死で引きの頂点が空いて魔王化し、裏組織が「実り」として育てた。動機の見えない冷たい災い。<div class="where">四部5章（通し24）で討つ。勝利は本物</div></div></li>
+          <li><span class="lname">裏のボス（人間側の顔）</span><div><span class="who">c-014 庭師</span>——元継承者・初代の弟子・約三百歳級。災厄を育てる設計者で、追っても芯に届かない敵の器。<div class="where">四部4章末（通し23）で収穫とともに命を燃やして果てる</div></div></li>
+          <li><span class="lname">幹部</span><div><span class="who">c-015 皆救い／c-016 時止まりの王／c-017 育ての親</span>——顔・力・手。共通文法は「失ったものの世話をやめられない」。<div class="where">四部3章（通し22）の一斉回収で正体が同時に判明</div></div></li>
+          <li><span class="lname">前段のボス</span><div><span class="who">N-09 名のある魔王</span>——三部の破局の張本人。都市を落とし、テラが完成した魔剣で討つ。討った相手の名がテラの継承者名になる（任命の根拠）。<div class="where">三部7章（通し19）</div></div></li>
+          <li><span class="lname">第一部の敵</span><div><span class="who">c-011 ヨナス（法術師）</span>——崩壊の火種。裏組織に利用され切り捨てられる。<div class="where">第一部内で行方不明。二部6章（通し12）に死体で判明</div></div></li>
+          <li><span class="lname">第一部の壁</span><div><span class="who">N-06 挫折相手（人間の法術使い）</span>——憧れの対象そのものに敗れる壁。黒幕とは別人・裏組織と無関係。主要人物。<div class="where">一部4章（通し4）。三部4章（通し16）に味方として一度・四部5章（通し24）に止め手の一人【仮】</div></div></li>
+        </ul>
+        <p class="note">裏組織の実務は N-08 仕事師（二部は指紋だけ・三部で姿・四部で交戦）。制度の壁（N-02 討魔院の長・N-07 学閥の指導者）は黒幕にせず、器の限界としての「やるせなさ」で置く。</p>
+      </div>
+      <div class="panel">
+        <h3>幕の運び（第四部・作者決定の順序）</h3>
+        <ol class="steps">
+          <li><div><b>c-020 からの正式継承</b><span class="where">四部1章</span><br>真の名・正式な技・奥義。盗めなかった締めの一手に「教わる橋」が架かる（F-007）。</div></li>
+          <li><div><b>両教の任命</b><span class="where">四部2章</span><br>大御灯と火元が揃い、分灯の儀で二つの火を一つの灯に。魔剣に教会の紋章。制度が百年ぶりに動く重さ。</div></li>
+          <li><div><b>一斉回収</b><span class="where">四部3章</span><br>二部6章の死体場面が四枚におろされ、幹部四人の正体と「災厄の線は偽装」が同時に判明。敵は人間の組織——と固まる。</div></li>
+          <li><div><b>庭師の本丸</b><span class="where">四部4章</span><br>ハルベック近郊の山野の庭へ。道行きで故郷の廃墟。F-002 裏層の最後のピースはこの直前。</div></li>
+          <li><div><b>収穫と庭師の最期</b><span class="where">四部4章末</span><br>直接対決のつもりが、庭師は命を燃やして実りを完成させ果てる。偽物と暴いたはずの災厄が、本物になって立つ。</div></li>
+          <li><div><b>最終決戦</b><span class="where">四部5章</span><br>皆で開けた道の先の一太刀（F-007 完成）。奥義を一線まで使い、戦友たち複数が体で止める（F-004 完了）。N-04 は止め手にせず道を開く側。</div></li>
+          <li><div><b>庭と書付</b><span class="where">四部6章</span><br>庭師の芯が証言でなく庭と書付で開く。血縁でない次世代 N-04 への継承で円環を閉じる。</div></li>
+        </ol>
+      </div>
+      <div class="panel">
+        <h3>鏡と二段返し</h3>
+        <ul class="mirror">
+          <li><b>鏡</b>: 数えられなかった子（テラ）と、数えられるためだけに育てられた獣（今代の災厄）。設計上の整合にだけ使い、舞台で「実はお前と同じ」の種明かしはしない。</li>
+          <li><b>二段返し</b>: 「裏に災厄がいる」（読者の読み筋・三部で補強）→「偽装だった、敵は人間の組織」（四部3章）→「本物が立つ」（四部4章末〜5章）。</li>
+          <li><b>同じ文法の反復</b>: 崩壊（天災に見えて人災）→ 大襲撃（災厄に見えて人の作為＋制度の欠陥）→ 戦争（顔のない波に見えて庭の引き＋誘引）。三つの事件は同じ指紋（誘引技術＋引きの利用）で一本の串になる。</li>
+        </ul>
+      </div>
+      <div class="panel">
+        <h3>敵の階段（部ごとの配分）</h3>
+        <ul class="stairs">
+          <li><span class="p">一</span><div>強大な魔獣（初実戦）<span class="arrow">→</span>人間の法術使い<span class="arrow">→</span>大襲撃（魔王）<span class="chs">2章 → 4章 → 6章</span></div></li>
+          <li><span class="p">二</span><div>等外の魔獣<span class="arrow">→</span>制度の壁（選別）<span class="arrow">→</span>最初の魔王（踊り場）<span class="chs">1〜3章 → 5章 → 6章</span></div></li>
+          <li><span class="p">三</span><div>魔王たち（戦争）<span class="arrow">→</span>名のある魔王＋人の手（仕事師）<span class="chs">4〜5章 → 6〜7章</span></div></li>
+          <li><span class="p">四</span><div>人間の組織<span class="arrow">→</span>庭師<span class="arrow">→</span>今代の災厄<span class="chs">3章 → 4章 → 5章</span></div></li>
+        </ul>
+        <p class="note">上がるほど「力では解決できない・人としてどう動くか」が問われる。四部の最終試験だけは敵の強さでなく「命の使い方」が壁になる。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="sec" id="timeline">
+  <div class="wrap">
+    <h2>時系列</h2>
+    <p class="lead">四部・全25章。章番号は通し（一部=1〜6・二部=7〜12・三部=13〜19・四部=20〜25）。年はオーデリア暦で、崩壊=1204年は仮置き（前後は連動して動く）。人物チップや伏線バッジをクリックすると、その人物・伏線が出る章だけが残って見える。もう一度クリックか Esc で解除。</p>
+    <div class="anchors"><span class="lbl">年表の錨（正典）</span>
+      <span class="a">8歳 灯見</span><span class="a">10歳 崩壊（1204）</span><span class="a">11歳 組織入り</span><span class="a">13歳 一部末</span><span class="a">15〜16歳 再会</span><span class="a">17〜18歳 交換</span><span class="a">19歳 二部末（告白）</span><span class="a">三部1章 付き合い始め</span><span class="a">21歳 結婚（三部2章）</span><span class="a">22歳 子の誕生</span><span class="a">25歳 三部末</span><span class="a">跳び約3年</span><span class="a">28歳 四部開幕</span><span class="a">29〜30歳 四部末</span>
+    </div>
+    <div class="legend">
+      <span class="g">人物:</span>
+      <span class="g"><span class="chip t-main"><span class="cname">主人公</span></span></span>
+      <span class="g"><span class="chip t-major"><span class="cname">主要人物</span></span></span>
+      <span class="g"><span class="chip t-key"><span class="cname">キーパーソン</span></span></span>
+      <span class="g"><span class="chip t-sub"><span class="cname">サブ</span></span></span>
+      <span class="g"><span class="chip t-new"><span class="cname">新規 N（未設計）</span></span></span>
+      <span class="g"><i class="mk mk-first">初</i> 初登場</span>
+      <span class="g"><i class="mk mk-death">†</i> 死亡</span>
+      <span class="g"><i class="mk mk-exit">退</i> 退場</span>
+      <span class="g"><i class="mk mk-kari">仮</i> 仮置き</span>
+    </div>
+    <div class="legend">
+      <span class="g">伏線:</span>
+      <span class="g"><span class="fb k-set"><span class="fsym">○</span><span class="fid">F-xxx</span><span class="fkind">設置</span></span></span>
+      <span class="g"><span class="fb k-mid"><span class="fsym">→</span><span class="fid">F-xxx</span><span class="fkind">中継</span></span></span>
+      <span class="g"><span class="fb k-get"><span class="fsym">●</span><span class="fid">F-xxx</span><span class="fkind">回収</span></span></span>
+      <span class="g">波:</span>
+      <span class="g"><span class="wave w-up"><b>↑</b>希望へ</span></span>
+      <span class="g"><span class="wave w-down"><b>↓</b>絶望へ</span></span>
+      <span class="g"><span class="wave w-flat"><b>→</b>断面</span></span>
+    </div>
+
+    
+<section class="part" id="part-1" data-part="1">
+  <header class="part-head">
+    <div class="part-stage" aria-hidden="true">起</div>
+    <div>
+      <h3>第一部 少年期<span class="part-count">6章【確定方向】</span></h3>
+      <p class="part-q"><span>部の問い</span>本当は何を求めているのか。答え＝人を救うこと（F-001・6章末で回収）。</p>
+      <p class="part-line"><span>部の一言</span>幸せな日常を失った少年が、生きるためだと言いながら人のために体を動かし続け、最後にその理由に追いつく。</p>
+    </div>
+  </header>
+  <ol class="chapters">
+<li class="ch" id="ch-1" data-ch="1" data-part="1" data-chars="c-001 c-004 c-005 c-006 c-007 c-008 c-009 c-010 c-011 c-012 c-013 c-002" data-fs="F-001 F-002 F-004 F-005 F-006 F-009 F-011">
+  <div class="rail">
+    <span class="num">1</span>
+    <span class="age">8→10歳</span>
+    <span class="year">1202→1204</span>
+  </div>
+  <article class="card">
+    <header class="card-head">
+      <span class="chlabel">一部1章<span class="through">通し1</span></span>
+      <h4>幸せな日常と崩壊<span class="status">【確定・18話 APPROVED】</span></h4>
+    </header>
+    <p class="sum">灯見の儀でエリーネが「才能あり」と読まれ、半年後に王都へ発つ（前日譚・間の半年は描かない）。一年半跳んで十歳の孤児院の日常。荷崩れでニコを庇い、ロルフと害魔狩りに加わり、法術師ヨナスが結界灯を置いて点灯夫セップが町に残る。結界灯に伸ばした手には何も起きない。ネルの枕元で童話「魔法と剣」を語る。静かすぎる夜、魔物が結界灯の方角から来る。退避の点呼で数えられず貯蔵庫に潜み、領主ヴァルデンと業魔の一騎打ちを戸の隙間から見る。朝、死者の名前を数える（最初はネル）。退去の列に入れず、二日目、廃墟にガルドが現れて目が合う。</p>
+    <dl class="meta">
+      <div class="row"><dt>登場</dt><dd><div class="chips"><button type="button" class="chip t-main" data-char="c-001"><span class="cid">c-001</span><span class="cname">テラベール</span><i class="mk mk-first" title="初登場">初</i></button><button type="button" class="chip t-major" data-char="c-004" title="前日譚"><span class="cid">c-004</span><span class="cname">エリーネ</span><i class="mk mk-first" title="初登場">初</i><span class="cnote">前日譚</span></button><button type="button" class="chip t-sub" data-char="c-005" title="退去"><span class="cid">c-005</span><span class="cname">ロルフ</span><i class="mk mk-first" title="初登場">初</i><i class="mk mk-exit" title="退場">退</i><span class="cnote">退去</span></button><button type="button" class="chip t-sub" data-char="c-006" title="退去"><span class="cid">c-006</span><span class="cname">ニコ</span><i class="mk mk-first" title="初登場">初</i><i class="mk mk-exit" title="退場">退</i><span class="cnote">退去</span></button><button type="button" class="chip t-sub" data-char="c-007"><span class="cid">c-007</span><span class="cname">ネル</span><i class="mk mk-first" title="初登場">初</i><i class="mk mk-death" title="死亡">†</i></button><button type="button" class="chip t-key" data-char="c-008" title="話16 視点回"><span class="cid">c-008</span><span class="cname">ヴァルデン</span><i class="mk mk-first" title="初登場">初</i><i class="mk mk-death" title="死亡">†</i><span class="cnote">話16 視点回</span></button><button type="button" class="chip t-key" data-char="c-009"><span class="cid">c-009</span><span class="cname">セップ</span><i class="mk mk-first" title="初登場">初</i></button><button type="button" class="chip t-sub" data-char="c-010"><span class="cid">c-010</span><span class="cname">ホルツ</span><i class="mk mk-first" title="初登場">初</i></button><button type="button" class="chip t-key" data-char="c-011" title="披露と設置のみ。以後は行方不明"><span class="cid">c-011</span><span class="cname">ヨナス（法術師）</span><i class="mk mk-first" title="初登場">初</i><i class="mk mk-exit" title="退場">退</i><span class="cnote">披露と設置のみ。以後は行方不明</span></button><button type="button" class="chip t-key" data-char="c-012" title="随行者"><span class="cid">c-012</span><span class="cname">オスカ（側近・恩義）</span><i class="mk mk-first" title="初登場">初</i><span class="cnote">随行者</span></button><button type="button" class="chip t-key" data-char="c-013" title="随行者"><span class="cid">c-013</span><span class="cname">リヴェル（側近・学徒）</span><i class="mk mk-first" title="初登場">初</i><span class="cnote">随行者</span></button><button type="button" class="chip t-major" data-char="c-002" title="話18"><span class="cid">c-002</span><span class="cname">ガルド</span><i class="mk mk-first" title="初登場">初</i><span class="cnote">話18</span></button></div><p class="scenery">点景: 猟師・行商・院の職員ほか（p 台帳）</p></dd></div>
+      <div class="row"><dt>伏線</dt><dd><div class="fbs"><button type="button" class="fb k-set" data-f="F-001" title="真の動機＝人を救うこと（本人未自覚）"><span class="fsym" aria-hidden="true">○</span><span class="fid">F-001</span><span class="fkind">設置</span><span class="flbl">土台</span></button><button type="button" class="fb k-set" data-f="F-002" title="崩壊の真相は二層"><span class="fsym" aria-hidden="true">○</span><span class="fid">F-002</span><span class="fkind">設置</span><span class="flbl">種1〜7</span></button><button type="button" class="fb k-set" data-f="F-004" title="救うことでしか自分を許せない（後天の変質）"><span class="fsym" aria-hidden="true">○</span><span class="fid">F-004</span><span class="fkind">設置</span><span class="flbl">種</span></button><button type="button" class="fb k-set" data-f="F-005" title="半年の空白"><span class="fsym" aria-hidden="true">○</span><span class="fid">F-005</span><span class="fkind">設置</span></button><button type="button" class="fb k-set" data-f="F-006" title="童話の一節が真相と符合"><span class="fsym" aria-hidden="true">○</span><span class="fid">F-006</span><span class="fkind">設置</span><span class="flbl">話12</span></button><button type="button" class="fb k-set" data-f="F-009" title="法術への憧れの品"><span class="fsym" aria-hidden="true">○</span><span class="fid">F-009</span><span class="fkind">設置</span></button><button type="button" class="fb k-set is-kari" data-f="F-011" title="少年期の縁の場所（ハルベック近郊の山野）"><span class="fsym" aria-hidden="true">○</span><span class="fid">F-011</span><span class="fkind">設置</span><span class="flbl">話6</span><span class="fkari">仮</span></button></div></dd></div>
+      <div class="row"><dt>敵・壁</dt><dd>害魔ガルティ（話6）・浸魔「道断ち」3体＋業魔「町喰い」（崩壊・テラは戦わない）</dd></div>
+      <div class="row"><dt>波</dt><dd><span class="wave w-up"><b aria-hidden="true">↑</b>希望へ</span>日常の充足（希望の山・厚く）→ 崩壊（絶望の底・速く）→ 差し出される手（点の希望）</dd></div>
+      <div class="row"><dt>エリーネ</dt><dd>前日譚 9→9歳半・町→王都へ。崩壊時 11・王都1年半目</dd></div>
+      <div class="row"><dt>仮</dt><dd class="kari-text">F-011 の吊り位置（話6 か 2章の道行きか）。F-006 の一節の文言は【未定】。</dd></div>
+    </dl>
+  </article>
+</li>
+<li class="ch" id="ch-2" data-ch="2" data-part="1" data-chars="c-001 c-002" data-fs="F-007 F-001 F-002 F-011">
+  <div class="rail">
+    <span class="num">2</span>
+    <span class="age">10〜11歳</span>
+    <span class="year">1204〜05</span>
+  </div>
+  <article class="card">
+    <header class="card-head">
+      <span class="chlabel">一部2章<span class="through">通し2</span></span>
+      <h4>ガルドとの旅<span class="status">【確定方向】</span></h4>
+    </header>
+    <p class="sum">飢えの始まりに差し出された食い物を、受け取り方を知らないまま受け取る。ガルドは正式に教えず、テラが所作を盗むところから稽古が始まる（灯回しの入り口）。道中でガルドが「獣の動きが揃っていた」と述懐し、天災の読みに最初の亀裂が入る。稽古で締めの一手を一度だけ見るが、盗めない。街道の隊商が襲われ、隣の誰かが死ぬ。体は倒れた人の方へ動いていたのに、本人は「逃げ遅れただけだ」と説明する。会の支部の街ヴェルデン【仮】へ。</p>
+    <dl class="meta">
+      <div class="row"><dt>登場</dt><dd><div class="chips"><button type="button" class="chip t-main" data-char="c-001"><span class="cid">c-001</span><span class="cname">テラベール</span></button><button type="button" class="chip t-major" data-char="c-002" title="本気の瞬間（青い瞳）を章の山に"><span class="cid">c-002</span><span class="cname">ガルド</span><span class="cnote">本気の瞬間（青い瞳）を章の山に</span></button></div><p class="scenery">点景: 隊商の人々・死ぬ誰か</p></dd></div>
+      <div class="row"><dt>伏線</dt><dd><div class="fbs"><button type="button" class="fb k-set" data-f="F-007" title="盗み切れなかった最後の一手"><span class="fsym" aria-hidden="true">○</span><span class="fid">F-007</span><span class="fkind">設置</span><span class="flbl">一度見せる</span></button><button type="button" class="fb k-mid" data-f="F-001" title="真の動機＝人を救うこと（本人未自覚）"><span class="fsym" aria-hidden="true">→</span><span class="fid">F-001</span><span class="fkind">中継</span><span class="flbl">最初の齟齬</span></button><button type="button" class="fb k-mid" data-f="F-002" title="崩壊の真相は二層"><span class="fsym" aria-hidden="true">→</span><span class="fid">F-002</span><span class="fkind">中継</span><span class="flbl">種8＝ガルドの述懐</span></button><button type="button" class="fb k-mid is-kari" data-f="F-011" title="少年期の縁の場所（ハルベック近郊の山野）"><span class="fsym" aria-hidden="true">→</span><span class="fid">F-011</span><span class="fkind">中継</span><span class="flbl">近郊の山野を抜ける道行き</span><span class="fkari">仮</span></button></div></dd></div>
+      <div class="row"><dt>敵・壁</dt><dd>強大な魔獣の一段目（壊魔級【仮】）</dd></div>
+      <div class="row"><dt>波</dt><dd><span class="wave w-down"><b aria-hidden="true">↓</b>絶望へ</span>上り（旅・技を盗む手応え）→ 初実戦の影</dd></div>
+      <div class="row"><dt>エリーネ</dt><dd>11〜12・王都</dd></div>
+      <div class="row"><dt>仮</dt><dd class="kari-text">初実戦の相手の等級と場所／合流時期（2章末か3章頭か）／ガルドが会の側にどう関わるか。</dd></div>
+    </dl>
+  </article>
+</li>
+<li class="ch" id="ch-3" data-ch="3" data-part="1" data-chars="c-001 c-002 c-003 c-018" data-fs="F-008 F-001 F-004">
+  <div class="rail">
+    <span class="num">3</span>
+    <span class="age">11〜12歳</span>
+    <span class="year">1205〜06</span>
+  </div>
+  <article class="card">
+    <header class="card-head">
+      <span class="chlabel">一部3章<span class="through">通し3</span></span>
+      <h4>討伐組織<span class="status">【確定方向】</span></h4>
+    </header>
+    <p class="sum">勇者の会に引き取られ、雑用係になる（建前は引き取りの手、実態は頭数）。裏帳場の理不尽の中で、同年代の少年兵 c-003 と「助け合う」約束を交わし、テラはそれを「少年兵が減れば自分の生存率が下がる」と説明する。c-018 も少年兵仲間として初出。人手不足の狩りに頭数で出され、盗んだ所作が効いて生き残り、少年兵になる。周囲の目が変わり、自惚れの芽。難物を仲間と仕留め、「強くなった」実感で章を閉じる。</p>
+    <dl class="meta">
+      <div class="row"><dt>登場</dt><dd><div class="chips"><button type="button" class="chip t-main" data-char="c-001"><span class="cid">c-001</span><span class="cname">テラベール</span></button><button type="button" class="chip t-major" data-char="c-002" title="稽古は続く。関わり方は仮"><span class="cid">c-002</span><span class="cname">ガルド</span><i class="mk mk-kari" title="仮置き">仮</i><span class="cnote">稽古は続く。関わり方は仮</span></button><button type="button" class="chip t-major" data-char="c-003" title="約束の相手"><span class="cid">c-003</span><span class="cname">友人【名未定】</span><i class="mk mk-first" title="初登場">初</i><span class="cnote">約束の相手</span></button><button type="button" class="chip t-major" data-char="c-018" title="少年兵仲間"><span class="cid">c-018</span><span class="cname">戦友【名未定】</span><i class="mk mk-first" title="初登場">初</i><span class="cnote">少年兵仲間</span></button></div><p class="scenery">点景: 帳場の顔・隊長・他の少年兵</p></dd></div>
+      <div class="row"><dt>伏線</dt><dd><div class="fbs"><button type="button" class="fb k-set" data-f="F-008" title="第一部の仲間との前線再会"><span class="fsym" aria-hidden="true">○</span><span class="fid">F-008</span><span class="fkind">設置</span><span class="flbl">c-018 初出</span></button><button type="button" class="fb k-mid" data-f="F-001" title="真の動機＝人を救うこと（本人未自覚）"><span class="fsym" aria-hidden="true">→</span><span class="fid">F-001</span><span class="fkind">中継</span><span class="flbl">生存率の理屈</span></button><button type="button" class="fb k-mid" data-f="F-004" title="救うことでしか自分を許せない（後天の変質）"><span class="fsym" aria-hidden="true">→</span><span class="fid">F-004</span><span class="fkind">中継</span><span class="flbl">取り分を渡す癖の初出</span></button></div></dd></div>
+      <div class="row"><dt>敵・壁</dt><dd>害魔〜壊魔の討伐の日々</dd></div>
+      <div class="row"><dt>波</dt><dd><span class="wave w-up"><b aria-hidden="true">↑</b>希望へ</span>上り（自惚れ）</dd></div>
+      <div class="row"><dt>エリーネ</dt><dd>12〜13・王都</dd></div>
+      <div class="row"><dt>仮</dt><dd class="kari-text">裏帳場の顔（点景か N-ID か）。</dd></div>
+    </dl>
+  </article>
+</li>
+<li class="ch" id="ch-4" data-ch="4" data-part="1" data-chars="c-001 c-002 c-003 N-06 N-15 N-16 N-17 c-017" data-fs="F-001 F-004">
+  <div class="rail">
+    <span class="num">4</span>
+    <span class="age">12歳</span>
+    <span class="year">1206</span>
+  </div>
+  <article class="card">
+    <header class="card-head">
+      <span class="chlabel">一部4章<span class="through">通し4</span></span>
+      <h4>敗北と迂回<span class="status">【確定方向・敗北の状況は未定】</span></h4>
+    </header>
+    <p class="sum">会の任務先で人間の法術使い N-06 と衝突し、剣で挑んで遠くから潰される（日常を奪ったのも、憧れの対象も、敗北の相手も法術使い）。自惚れが折れ、剣から一瞬離れて法術を学ぶ。学習経路の一つは法術院——同じ町にある学院で、詠唱・魔法陣の基礎を学ぶ。入り方は【仮】: 少年兵の雑用の縁で出入りし、正規の生徒ではない。学院の生徒 N-16（同い年の貴族）・N-17（同い年の平民）と教師 N-15 との関係を築き、平民と貴族の環境の対比（灯が水路になる側と、そうでない側）を外から見る。詠唱は不発、火花止まり。灯器の天井を最初に言葉にするのは N-15【仮】。仲間の危機に撃とうとして撃てず、剣で間に合わせて天井を体で知る。法具工房の職人（c-017 の表の顔）経由は副次【仮】。ガルドの一言【仮】で剣に戻る。c-003 に組織の勧誘の影が差す。</p>
+    <dl class="meta">
+      <div class="row"><dt>登場</dt><dd><div class="chips"><button type="button" class="chip t-main" data-char="c-001"><span class="cid">c-001</span><span class="cname">テラベール</span></button><button type="button" class="chip t-major" data-char="c-002" title="剣に戻る一言"><span class="cid">c-002</span><span class="cname">ガルド</span><span class="cnote">剣に戻る一言</span></button><button type="button" class="chip t-major" data-char="c-003" title="勧誘の影"><span class="cid">c-003</span><span class="cname">友人【名未定】</span><i class="mk mk-kari" title="仮置き">仮</i><span class="cnote">勧誘の影</span></button><button type="button" class="chip t-major" data-char="N-06"><span class="cid">N-06</span><span class="cname">挫折相手（人間の法術使い）</span><i class="mk mk-first" title="初登場">初</i></button><button type="button" class="chip t-new" data-char="N-15" title="学院の教師"><span class="cid">N-15</span><span class="cname">学院の教師（テラを教える側）</span><i class="mk mk-first" title="初登場">初</i><i class="mk mk-kari" title="仮置き">仮</i><span class="cnote">学院の教師</span></button><button type="button" class="chip t-new" data-char="N-16" title="学院の貴族の生徒"><span class="cid">N-16</span><span class="cname">学院の同い年の貴族の生徒</span><i class="mk mk-first" title="初登場">初</i><i class="mk mk-kari" title="仮置き">仮</i><span class="cnote">学院の貴族の生徒</span></button><button type="button" class="chip t-new" data-char="N-17" title="学院の平民の生徒"><span class="cid">N-17</span><span class="cname">学院の同い年の平民の生徒</span><i class="mk mk-first" title="初登場">初</i><i class="mk mk-kari" title="仮置き">仮</i><span class="cnote">学院の平民の生徒</span></button><button type="button" class="chip t-key" data-char="c-017" title="表の顔＝法具工房の職人（副次）"><span class="cid">c-017</span><span class="cname">育ての親【名未定】</span><i class="mk mk-first" title="初登場">初</i><i class="mk mk-kari" title="仮置き">仮</i><span class="cnote">表の顔＝法具工房の職人（副次）</span></button></div><p class="scenery">点景: 学院の生徒たち・隊の仲間</p></dd></div>
+      <div class="row"><dt>伏線</dt><dd><div class="fbs"><button type="button" class="fb k-mid" data-f="F-001" title="真の動機＝人を救うこと（本人未自覚）"><span class="fsym" aria-hidden="true">→</span><span class="fid">F-001</span><span class="fkind">中継</span><span class="flbl">法術への未練の行き先</span></button><button type="button" class="fb k-mid" data-f="F-004" title="救うことでしか自分を許せない（後天の変質）"><span class="fsym" aria-hidden="true">→</span><span class="fid">F-004</span><span class="fkind">中継</span></button></div><p class="scenery">伏線表外: c-003 内通の種（設置・章設計時に登録を提案）</p></dd></div>
+      <div class="row"><dt>敵・壁</dt><dd>人間の法術使い N-06（階段の二段目）</dd></div>
+      <div class="row"><dt>波</dt><dd><span class="wave w-down"><b aria-hidden="true">↓</b>絶望へ</span>下り（敗北）→ 迂回の細い上り → 天井の壁</dd></div>
+      <div class="row"><dt>エリーネ</dt><dd>13・王都</dd></div>
+      <div class="row"><dt>仮</dt><dd class="kari-text">敗北の状況／学院への入り方（少年兵の雑用の縁）／c-017 の顔出し（副次）／勧誘の影の出し方。</dd></div>
+    </dl>
+  </article>
+</li>
+<li class="ch" id="ch-5" data-ch="5" data-part="1" data-chars="c-001 N-01 c-003 c-018" data-fs="F-004 F-001 F-003">
+  <div class="rail">
+    <span class="num">5</span>
+    <span class="age">12〜13歳</span>
+    <span class="year">1206〜07</span>
+  </div>
+  <article class="card">
+    <header class="card-head">
+      <span class="chlabel">一部5章<span class="through">通し5</span></span>
+      <h4>再会<span class="status">【確定・兄弟姉妹のみ】</span></h4>
+    </header>
+    <p class="sum">会の任で兄姉の町【未定】へ。死んだはずの弟を見た兄と姉から、毎年テラを悼んでいた命日の習慣を知る。数えられなかった子が「数えられていた」と、死の報の形で知る。引き取りの選別の経緯が兄姉の口から出て、引き取られた側と残された側の暮らしの対比が立つ。テラは受け取り切れず、部分受容で止まる。守りたい具体的な顔（兄姉・c-003・c-018・仲間）が揃う。章末【仮】: 発つ朝に届く魔物の目撃増加の報せ。</p>
+    <dl class="meta">
+      <div class="row"><dt>登場</dt><dd><div class="chips"><button type="button" class="chip t-main" data-char="c-001"><span class="cid">c-001</span><span class="cname">テラベール</span></button><button type="button" class="chip t-new" data-char="N-01" title="命日の習慣"><span class="cid">N-01</span><span class="cname">兄姉（兄と姉・二人一組）</span><i class="mk mk-first" title="初登場">初</i><span class="cnote">命日の習慣</span></button><button type="button" class="chip t-major" data-char="c-003" title="同行はどちらか"><span class="cid">c-003</span><span class="cname">友人【名未定】</span><i class="mk mk-kari" title="仮置き">仮</i><span class="cnote">同行はどちらか</span></button><button type="button" class="chip t-major" data-char="c-018" title="同行はどちらか"><span class="cid">c-018</span><span class="cname">戦友【名未定】</span><i class="mk mk-kari" title="仮置き">仮</i><span class="cnote">同行はどちらか</span></button></div><p class="scenery">点景: 引き取り先の親類</p></dd></div>
+      <div class="row"><dt>伏線</dt><dd><div class="fbs"><button type="button" class="fb k-mid" data-f="F-004" title="救うことでしか自分を許せない（後天の変質）"><span class="fsym" aria-hidden="true">→</span><span class="fid">F-004</span><span class="fkind">中継</span><span class="flbl">受け取れない</span></button><button type="button" class="fb k-mid" data-f="F-001" title="真の動機＝人を救うこと（本人未自覚）"><span class="fsym" aria-hidden="true">→</span><span class="fid">F-001</span><span class="fkind">中継</span></button><button type="button" class="fb k-mid is-kari" data-f="F-003" title="大襲撃の原因＝裏組織の作為"><span class="fsym" aria-hidden="true">→</span><span class="fid">F-003</span><span class="fkind">中継</span><span class="flbl">前触れ</span><span class="fkari">仮</span></button></div></dd></div>
+      <div class="row"><dt>敵・壁</dt><dd>なし（心の壁の章）</dd></div>
+      <div class="row"><dt>波</dt><dd><span class="wave w-up"><b aria-hidden="true">↑</b>希望へ</span>上り（悼まれていた）</dd></div>
+      <div class="row"><dt>エリーネ</dt><dd>13〜14・王都</dd></div>
+      <div class="row"><dt>仮</dt><dd class="kari-text">町の場所／同行者／章末の断面。兄姉の設計は急いで固めない（作者指示）。</dd></div>
+    </dl>
+  </article>
+</li>
+<li class="ch" id="ch-6" data-ch="6" data-part="1" data-chars="c-001 c-002 c-003 c-018 N-07" data-fs="F-003 F-010 F-007 F-004 F-001">
+  <div class="rail">
+    <span class="num">6</span>
+    <span class="age">13歳</span>
+    <span class="year">1207</span>
+  </div>
+  <article class="card">
+    <header class="card-head">
+      <span class="chlabel">一部6章<span class="through">通し6</span></span>
+      <h4>大襲撃と気づき<span class="status">【確定方向】</span></h4>
+    </header>
+    <p class="sum">テラ十三歳。原因不明の大襲撃（裏は誘引技術の大規模版＋魔王の引きの利用。作中では原因不明のまま）。会は腐敗で動けず、学閥の指導者 N-07 は法術で覆おうとして剣側と噛み合わず、損害が膨らむ。逃げる場面でテラの体が仲間の方へ動き、自己説明が破綻する。ボスは主の成り果ての大狼。ガルドは奥義（命を削る強化と予知）を使い、締めの一手で大狼を討つ。テラはその一手を最後に見て、見えていない一拍が残る。ガルドは灯を燃やし尽くして膝をつき、死ぬ（真の名は明かさない）。大狼が倒れても後続の魔物が押し寄せ、対抗勢力は撤退を余儀なくされる。テラは仲間に引きずられて退き、ガルドの遺体も遺品（剣を含む）も持ち帰る隙がない。撤退の混乱の中で側近の獣と目が合い、獣は討たれずに消える。撤退後の静けさの中で c-003 の一言「お前、真っ先に走っただろ」。求めていたのは法術ではなく人を救うことだった、とテラ自身が解釈する。その後、討魔院が結成され、スカウトされる。</p>
+    <dl class="meta">
+      <div class="row"><dt>登場</dt><dd><div class="chips"><button type="button" class="chip t-main" data-char="c-001"><span class="cid">c-001</span><span class="cname">テラベール</span></button><button type="button" class="chip t-major" data-char="c-002" title="奥義と一手で大狼を討ち、灯を燃やし尽くして死ぬ。遺体も遺品も残らない"><span class="cid">c-002</span><span class="cname">ガルド</span><i class="mk mk-death" title="死亡">†</i><span class="cnote">奥義と一手で大狼を討ち、灯を燃やし尽くして死ぬ。遺体も遺品も残らない</span></button><button type="button" class="chip t-major" data-char="c-003" title="気づきの立会人"><span class="cid">c-003</span><span class="cname">友人【名未定】</span><span class="cnote">気づきの立会人</span></button><button type="button" class="chip t-major" data-char="c-018"><span class="cid">c-018</span><span class="cname">戦友【名未定】</span></button><button type="button" class="chip t-new" data-char="N-07" title="遠景"><span class="cid">N-07</span><span class="cname">学閥の指導者（善意の改革者）</span><i class="mk mk-first" title="初登場">初</i><span class="cnote">遠景</span></button></div><p class="scenery">点景: 討魔院の使い・各地の対抗勢力</p></dd></div>
+      <div class="row"><dt>伏線</dt><dd><div class="fbs"><button type="button" class="fb k-set" data-f="F-003" title="大襲撃の原因＝裏組織の作為"><span class="fsym" aria-hidden="true">○</span><span class="fid">F-003</span><span class="fkind">設置</span><span class="flbl">原因不明のまま</span></button><button type="button" class="fb k-set" data-f="F-010" title="側近の獣の強い一筆"><span class="fsym" aria-hidden="true">○</span><span class="fid">F-010</span><span class="fkind">設置</span><span class="flbl">撤退の混乱の中で獣と目が合う</span></button><button type="button" class="fb k-mid" data-f="F-007" title="盗み切れなかった最後の一手"><span class="fsym" aria-hidden="true">→</span><span class="fid">F-007</span><span class="fkind">中継</span><span class="flbl">大狼を討つ一手を最後に見て失われる</span></button><button type="button" class="fb k-mid" data-f="F-004" title="救うことでしか自分を許せない（後天の変質）"><span class="fsym" aria-hidden="true">→</span><span class="fid">F-004</span><span class="fkind">中継</span><span class="flbl">喪失の名前が積まれる</span></button><button type="button" class="fb k-get" data-f="F-001" title="真の動機＝人を救うこと（本人未自覚）"><span class="fsym" aria-hidden="true">●</span><span class="fid">F-001</span><span class="fkind">回収</span><span class="flbl">撤退後・c-003 の一言</span></button></div></dd></div>
+      <div class="row"><dt>敵・壁</dt><dd>大襲撃（魔王＝主の成り果ての大狼。討っても後続が押し寄せる）</dd></div>
+      <div class="row"><dt>波</dt><dd><span class="wave w-up"><b aria-hidden="true">↑</b>希望へ</span>底（絶望）→ 気づきの静かな光。十三歳の幼さを残す</dd></div>
+      <div class="row"><dt>エリーネ</dt><dd>14・王都（崩壊の報からテラを死んだと思い続けている）</dd></div>
+      <div class="row"><dt>仮</dt><dd class="kari-text">c-003 がこの章で組織側へ傾く画を入れるか。</dd></div>
+    </dl>
+  </article>
+</li></ol>
+</section>
+    
+<aside class="band" data-band="1" data-part="1">
+  <h4>一部末 → 二部頭<span>部の末尾の状態＝次の部の冒頭の状態</span></h4>
+  <ul><li>テラ13歳。F-001 は回収済み（求めていたのは人を救うこと。以後この気づきは格下げしない）。</li><li>ガルドは死亡。遺体も遺品（剣を含む）も持ち帰れておらず、墓がない。真の流派名はテラに伝わっていない。締めの一手は二度見て盗めていない。</li><li>討魔院が結成され、テラはスカウトされた。勇者の会は存続し院と不仲。</li><li>エリーネはテラを死んだと思ったまま王都にいる。c-003 は組織の勧誘の影を持ったまま別れる。c-018 は別の道へ（三部で再会）。兄姉は生きていると知った。</li><li>側近の獣は消えた。大襲撃は原因不明のまま。「裏に災厄がいる」の読みはまだ出ていない。</li><li>二部1章は約1年跳んで「上澄みの剣」から始める（跳びの明示から入る）。</li></ul>
+</aside>
+    
+<section class="part" id="part-2" data-part="2">
+  <header class="part-head">
+    <div class="part-stage" aria-hidden="true">承</div>
+    <div>
+      <h3>第二部 青年期前半<span class="part-count">6章【確定方向・章割りは中盤の波設計 §2 に準拠】</span></h3>
+      <p class="part-q"><span>部の問い</span>全員は救えない → 救われる側に回る。</p>
+      <p class="part-line"><span>部の一言</span>強くなれば救えると信じた男が、力で選べない夜に砕かれ、初めて手当てと言葉を受け取る。</p>
+    </div>
+  </header>
+  <ol class="chapters">
+<li class="ch" id="ch-7" data-ch="7" data-part="2" data-chars="c-001 c-019 N-03 N-02" data-fs="F-004">
+  <div class="rail">
+    <span class="num">7</span>
+    <span class="age">14〜15歳</span>
+    <span class="year">1208〜09</span>
+  </div>
+  <article class="card">
+    <header class="card-head">
+      <span class="chlabel">二部1章<span class="through">通し7</span></span>
+      <h4>上澄みの剣<span class="status">【仮題】</span></h4>
+    </header>
+    <p class="sum">約一年跳んで、討魔院で同世代から頭一つ抜けた強さと評判から始める。c-019 が弔いの流儀の違いとして継ぎ火の教えの言葉を渡すが、テラは聞き流す（二度置きの一度目）。N-03 討魔院の仲間と同じ隊【仮】。討魔院の長 N-02 は命令の出どころとして背景に。隣村の襲撃に夜通し走るが、着いた村はもう静かだった。テラは「もっと速く、もっと強ければ」と読み、実際に強くなる。業魔の大物を独力で討ち、査定役が「等外に近い」と漏らす。周囲の目が変わる。数える対象が「人」から「速さと強さ」へすり替わり、単独行動が増える。</p>
+    <dl class="meta">
+      <div class="row"><dt>登場</dt><dd><div class="chips"><button type="button" class="chip t-main" data-char="c-001"><span class="cid">c-001</span><span class="cname">テラベール</span></button><button type="button" class="chip t-major" data-char="c-019" title="継ぎ火の教えの一度目"><span class="cid">c-019</span><span class="cname">継ぎ火の同僚【名未定】</span><i class="mk mk-first" title="初登場">初</i><span class="cnote">継ぎ火の教えの一度目</span></button><button type="button" class="chip t-new" data-char="N-03" title="同じ隊"><span class="cid">N-03</span><span class="cname">討魔院の仲間（終盤まで共にする）</span><i class="mk mk-first" title="初登場">初</i><i class="mk mk-kari" title="仮置き">仮</i><span class="cnote">同じ隊</span></button><button type="button" class="chip t-new" data-char="N-02" title="背景"><span class="cid">N-02</span><span class="cname">討魔院の長（正論の人）</span><i class="mk mk-first" title="初登場">初</i><span class="cnote">背景</span></button></div></dd></div>
+      <div class="row"><dt>伏線</dt><dd><div class="fbs"><button type="button" class="fb k-mid" data-f="F-004" title="救うことでしか自分を許せない（後天の変質）"><span class="fsym" aria-hidden="true">→</span><span class="fid">F-004</span><span class="fkind">中継</span><span class="flbl">数える対象のすり替わり</span></button></div><p class="scenery">伏線表外: 継ぎ火の一度目（二度置き）</p></dd></div>
+      <div class="row"><dt>敵・壁</dt><dd>業魔の大物（査定「等外に近い」）</dd></div>
+      <div class="row"><dt>波</dt><dd><span class="wave w-up"><b aria-hidden="true">↑</b>希望へ</span>危うい上り（若さゆえの慢心の芽）</dd></div>
+      <div class="row"><dt>エリーネ</dt><dd>15〜16・成業→年季奉公の任地（短縮選抜で約6年）</dd></div>
+      <div class="row"><dt>仮</dt><dd class="kari-text">N-03 の初出の形／討魔院の役職名（【未定】のため肩書は出さない）。</dd></div>
+    </dl>
+  </article>
+</li>
+<li class="ch" id="ch-8" data-ch="8" data-part="2" data-chars="c-001 c-004 N-03 c-019" data-fs="F-005 F-001">
+  <div class="rail">
+    <span class="num">8</span>
+    <span class="age">15〜16歳</span>
+    <span class="year">1209〜10</span>
+  </div>
+  <article class="card">
+    <header class="card-head">
+      <span class="chlabel">二部2章<span class="through">通し8</span></span>
+      <h4>幽霊を見る目<span class="status">【仮題】</span></h4>
+    </header>
+    <p class="sum">任地の討伐現場で、年季奉公で派遣された法術師と組む。髪で一目で分かる、エリーネ。彼女は約五年テラを死んだと思っていた（髪は弔いの器）。討伐後の「なぜ知らせなかった」に、テラは答えられない。誰かの帳面に載っているという発想を持たずに育った子には、知らせる選択肢がなかった。答えられなさから彼女が帳面の空白を悟り、一週間の事実関係を口にする（F-005 部分回収）。テラは変わらず美しい髪を「向こうで幸せにやっていた」と読み違える。任期が明けて別々の任地へ。細い便りが始まる。</p>
+    <dl class="meta">
+      <div class="row"><dt>登場</dt><dd><div class="chips"><button type="button" class="chip t-main" data-char="c-001"><span class="cid">c-001</span><span class="cname">テラベール</span></button><button type="button" class="chip t-major" data-char="c-004" title="再登場"><span class="cid">c-004</span><span class="cname">エリーネ</span><span class="cnote">再登場</span></button><button type="button" class="chip t-new" data-char="N-03" title="同隊"><span class="cid">N-03</span><span class="cname">討魔院の仲間（終盤まで共にする）</span><i class="mk mk-kari" title="仮置き">仮</i><span class="cnote">同隊</span></button><button type="button" class="chip t-major" data-char="c-019" title="同隊"><span class="cid">c-019</span><span class="cname">継ぎ火の同僚【名未定】</span><i class="mk mk-kari" title="仮置き">仮</i><span class="cnote">同隊</span></button></div></dd></div>
+      <div class="row"><dt>伏線</dt><dd><div class="fbs"><button type="button" class="fb k-get" data-f="F-005" title="半年の空白"><span class="fsym" aria-hidden="true">●</span><span class="fid">F-005</span><span class="fkind">回収</span><span class="flbl">部分回収</span></button><button type="button" class="fb k-mid" data-f="F-001" title="真の動機＝人を救うこと（本人未自覚）"><span class="fsym" aria-hidden="true">→</span><span class="fid">F-001</span><span class="fkind">中継</span><span class="flbl">禁則: 彼女は本質を言語化しない</span></button></div></dd></div>
+      <div class="row"><dt>敵・壁</dt><dd>討伐現場の魔物（業魔級【仮】）</dd></div>
+      <div class="row"><dt>波</dt><dd><span class="wave w-up"><b aria-hidden="true">↑</b>希望へ</span>上り</dd></div>
+      <div class="row"><dt>エリーネ</dt><dd>16〜17・任地（テラと同じ現場）→別の任地</dd></div>
+      <div class="row"><dt>仮</dt><dd class="kari-text">討伐現場の場所と魔物。</dd></div>
+    </dl>
+  </article>
+</li>
+<li class="ch" id="ch-9" data-ch="9" data-part="2" data-chars="c-001 c-015 c-014 c-009 c-003 c-004 N-10" data-fs="F-009 F-002 F-011 F-004">
+  <div class="rail">
+    <span class="num">9</span>
+    <span class="age">16〜17歳</span>
+    <span class="year">1210〜11</span>
+  </div>
+  <article class="card">
+    <header class="card-head">
+      <span class="chlabel">二部3章<span class="through">通し9</span></span>
+      <h4>救えた手と救えなかった手<span class="status">【仮題】</span></h4>
+    </header>
+    <p class="sum">襲撃の村で若い母親を救うが、夫と子どもは間に合わず、後日「なぜうちが後だったのか」と恨まれる。テラは「力が足りなかっただけだ」と読み違える。故郷方面の任のついでに、壊滅した孤児院の跡へ。c-015 皆救いが下っ端として無害な顔で立ち、草を刈る名もない男（c-014 庭師）をテラだけは数えない。失われたはずの憧れの品が戻る（F-009）。点灯夫セップの証言【仮】で、結界灯は誘引装置・法術師の名はヨナスと分かり、天災の読みが人災に書き換わる。c-003 が討魔院側へ移ってきて再びそばに（内通の始まり）。N-10 対比人物と出会う【仮】。エリーネとの便りで距離が縮まり、互いの奥の罪悪感が見え始める。</p>
+    <dl class="meta">
+      <div class="row"><dt>登場</dt><dd><div class="chips"><button type="button" class="chip t-main" data-char="c-001"><span class="cid">c-001</span><span class="cname">テラベール</span></button><button type="button" class="chip t-key" data-char="c-015" title="下っ端の顔"><span class="cid">c-015</span><span class="cname">皆救い【名未定】</span><i class="mk mk-first" title="初登場">初</i><span class="cnote">下っ端の顔</span></button><button type="button" class="chip t-major" data-char="c-014" title="草を刈る名もない男"><span class="cid">c-014</span><span class="cname">庭師【名未定】</span><i class="mk mk-first" title="初登場">初</i><span class="cnote">草を刈る名もない男</span></button><button type="button" class="chip t-key" data-char="c-009" title="証言"><span class="cid">c-009</span><span class="cname">セップ</span><i class="mk mk-kari" title="仮置き">仮</i><span class="cnote">証言</span></button><button type="button" class="chip t-major" data-char="c-003" title="再合流・内通の始まり"><span class="cid">c-003</span><span class="cname">友人【名未定】</span><i class="mk mk-kari" title="仮置き">仮</i><span class="cnote">再合流・内通の始まり</span></button><button type="button" class="chip t-major" data-char="c-004" title="便り"><span class="cid">c-004</span><span class="cname">エリーネ</span><span class="cnote">便り</span></button><button type="button" class="chip t-new" data-char="N-10" title="月華流の剣士"><span class="cid">N-10</span><span class="cname">対比人物（今を生きられない者・月華流）</span><i class="mk mk-first" title="初登場">初</i><i class="mk mk-kari" title="仮置き">仮</i><span class="cnote">月華流の剣士</span></button></div></dd></div>
+      <div class="row"><dt>伏線</dt><dd><div class="fbs"><button type="button" class="fb k-get" data-f="F-009" title="法術への憧れの品"><span class="fsym" aria-hidden="true">●</span><span class="fid">F-009</span><span class="fkind">回収</span><span class="flbl">戻る</span></button><button type="button" class="fb k-get is-kari" data-f="F-002" title="崩壊の真相は二層"><span class="fsym" aria-hidden="true">●</span><span class="fid">F-002</span><span class="fkind">回収</span><span class="flbl">表層回収＝点灯夫の証言</span><span class="fkari">仮</span></button><button type="button" class="fb k-mid" data-f="F-011" title="少年期の縁の場所（ハルベック近郊の山野）"><span class="fsym" aria-hidden="true">→</span><span class="fid">F-011</span><span class="fkind">中継</span><span class="flbl">故郷の土地</span></button><button type="button" class="fb k-mid" data-f="F-004" title="救うことでしか自分を許せない（後天の変質）"><span class="fsym" aria-hidden="true">→</span><span class="fid">F-004</span><span class="fkind">中継</span></button></div></dd></div>
+      <div class="row"><dt>敵・壁</dt><dd>村を襲う魔物／人の側の恨み</dd></div>
+      <div class="row"><dt>波</dt><dd><span class="wave w-up"><b aria-hidden="true">↑</b>希望へ</span>下りの種を孕んだ上り</dd></div>
+      <div class="row"><dt>エリーネ</dt><dd>17〜18・別の任地（便り）</dd></div>
+      <div class="row"><dt>仮</dt><dd class="kari-text">セップの証言の章／c-003 の再合流の形／対比人物の初出位置／エリーネが公式説明を書き換えられる場面の有無。</dd></div>
+    </dl>
+  </article>
+</li>
+<li class="ch" id="ch-10" data-ch="10" data-part="2" data-chars="c-001 c-004 c-003 c-019" data-fs="F-005 F-004">
+  <div class="rail">
+    <span class="num">10</span>
+    <span class="age">17〜18歳</span>
+    <span class="year">1211〜12</span>
+  </div>
+  <article class="card">
+    <header class="card-head">
+      <span class="chlabel">二部4章<span class="through">通し10</span></span>
+      <h4>二つの不発話<span class="status">【仮題】</span></h4>
+    </header>
+    <p class="sum">心の壁の章。近づくほど、彼女の「そこにいなかった」とテラの「何もしなかった」がぶつかる。同じ現場でテラが手当てを拒み、彼女が短く言い切る衝突を一つ挟む【仮】。二つの不発話の交換——「行きたくないと言えなかった」「呼び止めなかった」（F-005 本回収）。報の日の話は彼女の口から短く。告白色は外し、ぎこちなく手をつなぎ、笑うだけ。つないだ手の温度のまま、それぞれの任地へ戻る。</p>
+    <dl class="meta">
+      <div class="row"><dt>登場</dt><dd><div class="chips"><button type="button" class="chip t-main" data-char="c-001"><span class="cid">c-001</span><span class="cname">テラベール</span></button><button type="button" class="chip t-major" data-char="c-004" title="交換の相手"><span class="cid">c-004</span><span class="cname">エリーネ</span><span class="cnote">交換の相手</span></button><button type="button" class="chip t-major" data-char="c-003" title="周辺"><span class="cid">c-003</span><span class="cname">友人【名未定】</span><span class="cnote">周辺</span></button><button type="button" class="chip t-major" data-char="c-019" title="周辺"><span class="cid">c-019</span><span class="cname">継ぎ火の同僚【名未定】</span><span class="cnote">周辺</span></button></div></dd></div>
+      <div class="row"><dt>伏線</dt><dd><div class="fbs"><button type="button" class="fb k-get" data-f="F-005" title="半年の空白"><span class="fsym" aria-hidden="true">●</span><span class="fid">F-005</span><span class="fkind">回収</span><span class="flbl">本回収・交換</span></button><button type="button" class="fb k-mid" data-f="F-004" title="救うことでしか自分を許せない（後天の変質）"><span class="fsym" aria-hidden="true">→</span><span class="fid">F-004</span><span class="fkind">中継</span><span class="flbl">受け取れない × 先に言う</span></button></div></dd></div>
+      <div class="row"><dt>敵・壁</dt><dd>なし（心の壁）</dd></div>
+      <div class="row"><dt>波</dt><dd><span class="wave w-up"><b aria-hidden="true">↑</b>希望へ</span>上りの頂点</dd></div>
+      <div class="row"><dt>エリーネ</dt><dd>18〜19・任地（交差）</dd></div>
+      <div class="row"><dt>仮</dt><dd class="kari-text">挟む事件の中身。</dd></div>
+    </dl>
+  </article>
+</li>
+<li class="ch" id="ch-11" data-ch="11" data-part="2" data-chars="c-001 N-02 N-03 c-019" data-fs="F-004">
+  <div class="rail">
+    <span class="num">11</span>
+    <span class="age">18〜19歳</span>
+    <span class="year">1212〜13</span>
+  </div>
+  <article class="card">
+    <header class="card-head">
+      <span class="chlabel">二部5章<span class="through">通し11</span></span>
+      <h4>選別の夜<span class="status">【仮題】</span></h4>
+    </header>
+    <p class="sum">分署に居合わせた夜、二つの集落からほぼ同時に救援要請。人手は一隊分。個の強さは選択の前で何の意味も持たず、距離と見込みで片方を選んで守り切る。数日後、選ばなかった側の犠牲者名簿に世話になった名前（誰かは【仮】）。慢心が砕ける。討魔院の長 N-02 のもとへ乗り込み絶叫する。長は悪人ではなく、人手・灯器・距離の数字を並べる——「両方に出せば両方が落ちた」「おまえが選んだから片方は生きている」。一言も返せない。絶望に浸る間もなく、次の派遣命令。</p>
+    <dl class="meta">
+      <div class="row"><dt>登場</dt><dd><div class="chips"><button type="button" class="chip t-main" data-char="c-001"><span class="cid">c-001</span><span class="cname">テラベール</span></button><button type="button" class="chip t-new" data-char="N-02" title="正面衝突"><span class="cid">N-02</span><span class="cname">討魔院の長（正論の人）</span><span class="cnote">正面衝突</span></button><button type="button" class="chip t-new" data-char="N-03" title="同じ夜の隊"><span class="cid">N-03</span><span class="cname">討魔院の仲間（終盤まで共にする）</span><i class="mk mk-kari" title="仮置き">仮</i><span class="cnote">同じ夜の隊</span></button><button type="button" class="chip t-major" data-char="c-019"><span class="cid">c-019</span><span class="cname">継ぎ火の同僚【名未定】</span></button></div><p class="scenery">点景: 名簿の名前</p></dd></div>
+      <div class="row"><dt>伏線</dt><dd><div class="fbs"><button type="button" class="fb k-mid" data-f="F-004" title="救うことでしか自分を許せない（後天の変質）"><span class="fsym" aria-hidden="true">→</span><span class="fid">F-004</span><span class="fkind">中継</span><span class="flbl">名前が戻る</span></button></div><p class="scenery">制度の壁（やるせなさ・解決しない）</p></dd></div>
+      <div class="row"><dt>敵・壁</dt><dd>制度の限界</dd></div>
+      <div class="row"><dt>波</dt><dd><span class="wave w-down"><b aria-hidden="true">↓</b>絶望へ</span>暴落</dd></div>
+      <div class="row"><dt>エリーネ</dt><dd>19〜20・任地</dd></div>
+      <div class="row"><dt>仮</dt><dd class="kari-text">名簿の名前の正体（二部3章で恨まれた母親の村か、二部1章の縁者か）。</dd></div>
+    </dl>
+  </article>
+</li>
+<li class="ch" id="ch-12" data-ch="12" data-part="2" data-chars="c-001 c-004 c-012 c-011 c-019 N-03 c-003" data-fs="F-012 F-007 F-004 F-002">
+  <div class="rail">
+    <span class="num">12</span>
+    <span class="age">19歳</span>
+    <span class="year">1213</span>
+  </div>
+  <article class="card">
+    <header class="card-head">
+      <span class="chlabel">二部6章<span class="through">通し12</span></span>
+      <h4>防衛戦<span class="status">【仮題】</span></h4>
+    </header>
+    <p class="sum">十九歳。任務先の町に魔王級が接近。十歳の夜に貯蔵庫から見た構図に、今度は前衛で立つ。殿で、盗み切れなかった最後の一手が出かかって崩れ、その隙が深手になる。町は守るが外れの集落は救えない。拠点へ運ばれ、動けない体でエリーネの看病を受け入れる（F-004 最初の転回）。回復期、追っていた糸の先でヨナスの死体に行き着く。案内し看取る目は c-012 オスカ。安らかな死に顔・腐らない体・空の灯器・世話の跡——四つの指紋（F-012）。結び、追い詰められたテラの隣にエリーネが座り、独り言のように思いを明かす。継ぎ火の言葉が再点火して刺さり、温かさで部が閉じる（精神的に未熟な一面は残したまま三部へ）。</p>
+    <dl class="meta">
+      <div class="row"><dt>登場</dt><dd><div class="chips"><button type="button" class="chip t-main" data-char="c-001"><span class="cid">c-001</span><span class="cname">テラベール</span></button><button type="button" class="chip t-major" data-char="c-004" title="看病・独り言の告白"><span class="cid">c-004</span><span class="cname">エリーネ</span><span class="cnote">看病・独り言の告白</span></button><button type="button" class="chip t-key" data-char="c-012" title="案内人・看取る目（本格初出）"><span class="cid">c-012</span><span class="cname">オスカ（側近・恩義）</span><i class="mk mk-first" title="初登場">初</i><span class="cnote">案内人・看取る目（本格初出）</span></button><button type="button" class="chip t-key" data-char="c-011" title="死体"><span class="cid">c-011</span><span class="cname">ヨナス（法術師）</span><i class="mk mk-death" title="死亡">†</i><span class="cnote">死体</span></button><button type="button" class="chip t-major" data-char="c-019" title="継ぎ火の二度目"><span class="cid">c-019</span><span class="cname">継ぎ火の同僚【名未定】</span><span class="cnote">継ぎ火の二度目</span></button><button type="button" class="chip t-new" data-char="N-03"><span class="cid">N-03</span><span class="cname">討魔院の仲間（終盤まで共にする）</span></button><button type="button" class="chip t-major" data-char="c-003" title="居合わせ方"><span class="cid">c-003</span><span class="cname">友人【名未定】</span><i class="mk mk-kari" title="仮置き">仮</i><span class="cnote">居合わせ方</span></button></div></dd></div>
+      <div class="row"><dt>伏線</dt><dd><div class="fbs"><button type="button" class="fb k-set" data-f="F-012" title="死体場面の四つの指紋"><span class="fsym" aria-hidden="true">○</span><span class="fid">F-012</span><span class="fkind">設置</span><span class="flbl">四つの指紋</span></button><button type="button" class="fb k-mid" data-f="F-007" title="盗み切れなかった最後の一手"><span class="fsym" aria-hidden="true">→</span><span class="fid">F-007</span><span class="fkind">中継</span><span class="flbl">一度目の崩れ</span></button><button type="button" class="fb k-mid" data-f="F-004" title="救うことでしか自分を許せない（後天の変質）"><span class="fsym" aria-hidden="true">→</span><span class="fid">F-004</span><span class="fkind">中継</span><span class="flbl">最初の転回（看病＋告白）</span></button><button type="button" class="fb k-mid" data-f="F-002" title="崩壊の真相は二層"><span class="fsym" aria-hidden="true">→</span><span class="fid">F-002</span><span class="fkind">中継</span><span class="flbl">表層回収の続き＝法術師の末路</span></button></div><p class="scenery">伏線表外: 継ぎ火の二度目（再点火）</p></dd></div>
+      <div class="row"><dt>敵・壁</dt><dd>最初の魔王（等外）</dd></div>
+      <div class="row"><dt>波</dt><dd><span class="wave w-up"><b aria-hidden="true">↑</b>希望へ</span>底からの支え</dd></div>
+      <div class="row"><dt>エリーネ</dt><dd>20・拠点（看病）</dd></div>
+      <div class="row"><dt>仮</dt><dd class="kari-text">拠点の町（三部の家と同じ町にする）／c-003 の居合わせ方／防衛戦の魔王の種。</dd></div>
+    </dl>
+  </article>
+</li></ol>
+</section>
+    
+<aside class="band" data-band="2" data-part="2">
+  <h4>二部末 → 三部頭<span>部の末尾の状態＝次の部の冒頭の状態</span></h4>
+  <ul><li>テラ19歳。深手からの回復期。エリーネの看病と独り言の告白を受け取った（F-004 最初の転回は済み）。求婚はまだ（三部2章）。</li><li>ヨナスの死体を見た。四つの指紋は「新たな謎」のまま。崩壊は人災（法術師の火種）まで判明。組織の存在は指紋の匂いだけ。</li><li>c-003 はテラのそばで手伝っている（内通は未露見・読者にも旧友に見える）。c-019・N-03 は同僚として隣にいる。</li><li>継ぎ火の教えを悟り直した。魔剣は熟成途中で未完成。一手は一度崩れた。</li><li>三部1章は日常の章から始める（拠点の町・討魔院の任・平凡に付き合い始める）。</li></ul>
+</aside>
+    
+<section class="part" id="part-3" data-part="3">
+  <header class="part-head">
+    <div class="part-stage" aria-hidden="true">転</div>
+    <div>
+      <h3>第三部 青年期後半<span class="part-count">7章【確定方向・ほぼ確定、途中で戻す可能性あり】</span></h3>
+      <p class="part-q"><span>部の問い</span>救済の強迫。</p>
+      <p class="part-line"><span>部の一言</span>家を持った男が、全部救おうとして家に帰れなくなり、一夜で名前に潰される。</p>
+    </div>
+  </header>
+  <ol class="chapters">
+<li class="ch" id="ch-13" data-ch="13" data-part="3" data-chars="c-001 c-004 c-019 N-03 c-003" data-fs="F-004 F-003">
+  <div class="rail">
+    <span class="num">13</span>
+    <span class="age">19〜20歳</span>
+    <span class="year">1213〜14</span>
+  </div>
+  <article class="card">
+    <header class="card-head">
+      <span class="chlabel">三部1章<span class="through">通し13</span></span>
+      <h4>隣にいる<span class="status">【仮題】</span></h4>
+    </header>
+    <p class="sum">回復期の終わり。討魔院の任と拠点の町の日々。エリーネとの付き合いが便りから会うことに変わり、平凡に付き合い始める——告白は二部6章で済んでいて、ここは「一緒にいる」が当たり前になる過程（求婚はまだ）。任で瀕死の同僚（N-03【仮】）を救い、拠点で待つ同僚の妻の顔を見て、待つ側がいる重さと自分が待たれる恐れを同時に見る【仮】。少ない灯を無駄なく使う魔剣の熟成が始まる。章末【仮】: 拠点近くの誘引の跡の報せ（仕事師の指紋）。</p>
+    <dl class="meta">
+      <div class="row"><dt>登場</dt><dd><div class="chips"><button type="button" class="chip t-main" data-char="c-001"><span class="cid">c-001</span><span class="cname">テラベール</span></button><button type="button" class="chip t-major" data-char="c-004" title="付き合い始め"><span class="cid">c-004</span><span class="cname">エリーネ</span><span class="cnote">付き合い始め</span></button><button type="button" class="chip t-major" data-char="c-019"><span class="cid">c-019</span><span class="cname">継ぎ火の同僚【名未定】</span></button><button type="button" class="chip t-new" data-char="N-03" title="瀕死の同僚【仮】"><span class="cid">N-03</span><span class="cname">討魔院の仲間（終盤まで共にする）</span><span class="cnote">瀕死の同僚【仮】</span></button><button type="button" class="chip t-major" data-char="c-003" title="そばで手伝う"><span class="cid">c-003</span><span class="cname">友人【名未定】</span><span class="cnote">そばで手伝う</span></button></div><p class="scenery">点景: 同僚とその妻</p></dd></div>
+      <div class="row"><dt>伏線</dt><dd><div class="fbs"><button type="button" class="fb k-mid is-kari" data-f="F-004" title="救うことでしか自分を許せない（後天の変質）"><span class="fsym" aria-hidden="true">→</span><span class="fid">F-004</span><span class="fkind">中継</span><span class="flbl">待たれる恐れ（折り返しの手前）</span><span class="fkari">仮</span></button><button type="button" class="fb k-mid is-kari" data-f="F-003" title="大襲撃の原因＝裏組織の作為"><span class="fsym" aria-hidden="true">→</span><span class="fid">F-003</span><span class="fkind">中継</span><span class="flbl">仕事師の指紋</span><span class="fkari">仮</span></button></div></dd></div>
+      <div class="row"><dt>敵・壁</dt><dd>なし（日常）</dd></div>
+      <div class="row"><dt>波</dt><dd><span class="wave w-up"><b aria-hidden="true">↑</b>希望へ</span>上り（幸せの貯金）</dd></div>
+      <div class="row"><dt>エリーネ</dt><dd>20〜21・拠点</dd></div>
+      <div class="row"><dt>仮</dt><dd class="kari-text">年季の扱い／章末の断面。</dd></div>
+    </dl>
+  </article>
+</li>
+<li class="ch" id="ch-14" data-ch="14" data-part="3" data-chars="c-001 c-004 N-01 c-003 c-019 N-03 N-10" data-fs="F-004 F-005 F-007 F-003">
+  <div class="rail">
+    <span class="num">14</span>
+    <span class="age">20〜21歳</span>
+    <span class="year">1214〜15</span>
+  </div>
+  <article class="card">
+    <header class="card-head">
+      <span class="chlabel">三部2章<span class="through">通し14</span></span>
+      <h4>拠点<span class="status">【仮題】</span></h4>
+    </header>
+    <p class="sum">討魔院の任と拠点の日々。求婚を言い出せない——口では「この仕事は危険だから」、芯は「自分に資格があるか」（F-004 の折り返し）。王都からの召し【仮】を押しに、テラから求婚する。結婚（テラ二十一歳）。式に兄姉 N-01【仮】。拠点＝半定住の家。少ない灯を無駄なく使う魔剣の技が形になる（完成はさせない）。N-10 対比人物と再会【仮】——今を生きられない者との対置で、テラは今を生き始めている側に立つ。c-003 が拠点の近くで組織の手伝いをしている（読者には便利な旧友に見える）。結婚後も章の終わりまで比較的平和な日常。章末【仮】: 日常の中に薄く、拠点近くの誘引の跡（仕事師の指紋）。</p>
+    <dl class="meta">
+      <div class="row"><dt>登場</dt><dd><div class="chips"><button type="button" class="chip t-main" data-char="c-001"><span class="cid">c-001</span><span class="cname">テラベール</span></button><button type="button" class="chip t-major" data-char="c-004" title="求婚の相手・結婚"><span class="cid">c-004</span><span class="cname">エリーネ</span><span class="cnote">求婚の相手・結婚</span></button><button type="button" class="chip t-new" data-char="N-01" title="式に来る"><span class="cid">N-01</span><span class="cname">兄姉（兄と姉・二人一組）</span><i class="mk mk-kari" title="仮置き">仮</i><span class="cnote">式に来る</span></button><button type="button" class="chip t-major" data-char="c-003"><span class="cid">c-003</span><span class="cname">友人【名未定】</span></button><button type="button" class="chip t-major" data-char="c-019"><span class="cid">c-019</span><span class="cname">継ぎ火の同僚【名未定】</span></button><button type="button" class="chip t-new" data-char="N-03"><span class="cid">N-03</span><span class="cname">討魔院の仲間（終盤まで共にする）</span></button><button type="button" class="chip t-new" data-char="N-10" title="再会"><span class="cid">N-10</span><span class="cname">対比人物（今を生きられない者・月華流）</span><i class="mk mk-kari" title="仮置き">仮</i><span class="cnote">再会</span></button></div></dd></div>
+      <div class="row"><dt>伏線</dt><dd><div class="fbs"><button type="button" class="fb k-mid" data-f="F-004" title="救うことでしか自分を許せない（後天の変質）"><span class="fsym" aria-hidden="true">→</span><span class="fid">F-004</span><span class="fkind">中継</span><span class="flbl">折り返し・求婚</span></button><button type="button" class="fb k-mid" data-f="F-005" title="半年の空白"><span class="fsym" aria-hidden="true">→</span><span class="fid">F-005</span><span class="fkind">中継</span><span class="flbl">後日（外側）: 先に言う逆転</span></button><button type="button" class="fb k-mid" data-f="F-007" title="盗み切れなかった最後の一手"><span class="fsym" aria-hidden="true">→</span><span class="fid">F-007</span><span class="fkind">中継</span><span class="flbl">稽古で一手に届かない</span></button><button type="button" class="fb k-mid is-kari" data-f="F-003" title="大襲撃の原因＝裏組織の作為"><span class="fsym" aria-hidden="true">→</span><span class="fid">F-003</span><span class="fkind">中継</span><span class="flbl">仕事師の指紋</span><span class="fkari">仮</span></button></div></dd></div>
+      <div class="row"><dt>敵・壁</dt><dd>なし〜前触れ</dd></div>
+      <div class="row"><dt>波</dt><dd><span class="wave w-up"><b aria-hidden="true">↑</b>希望へ</span>上り</dd></div>
+      <div class="row"><dt>エリーネ</dt><dd>21〜22・拠点（22歳で結婚）</dd></div>
+      <div class="row"><dt>仮</dt><dd class="kari-text">求婚を押す事件（王都からの召し【仮】）／対比人物の位置／魔剣の熟成の見せ方（魔剣の制約の具体は【未定】）。</dd></div>
+    </dl>
+  </article>
+</li>
+<li class="ch" id="ch-15" data-ch="15" data-part="3" data-chars="c-001 c-004 N-05 N-02 c-019 N-03 c-003 N-09" data-fs="F-003 F-008">
+  <div class="rail">
+    <span class="num">15</span>
+    <span class="age">21〜22歳</span>
+    <span class="year">1215〜16</span>
+  </div>
+  <article class="card">
+    <header class="card-head">
+      <span class="chlabel">三部3章<span class="through">通し15</span></span>
+      <h4>のろし<span class="status">【仮題】</span></h4>
+    </header>
+    <p class="sum">子 N-05 が生まれ、父になる。各地で魔王級の報せが同時に立ち上がる（裏は庭の引き＋組織の誘引。作中では顔のない波）。討魔院の再編と動員、N-02 の召集。連盟と学閥の政治が遠景で動く。c-019・N-03 と隊を組み、エリーネは拠点に残る【仮】。拠点の町での最後の日常。最終話あたりで戦争ののろしが上がり、N-09 名のある魔王の名が初めて立つ【仮】。前線へ発つ朝の断面。</p>
+    <dl class="meta">
+      <div class="row"><dt>登場</dt><dd><div class="chips"><button type="button" class="chip t-main" data-char="c-001"><span class="cid">c-001</span><span class="cname">テラベール</span></button><button type="button" class="chip t-major" data-char="c-004" title="拠点に残る"><span class="cid">c-004</span><span class="cname">エリーネ</span><span class="cnote">拠点に残る</span></button><button type="button" class="chip t-new" data-char="N-05" title="誕生"><span class="cid">N-05</span><span class="cname">テラとエリーネの子</span><i class="mk mk-first" title="初登場">初</i><span class="cnote">誕生</span></button><button type="button" class="chip t-new" data-char="N-02" title="召集"><span class="cid">N-02</span><span class="cname">討魔院の長（正論の人）</span><span class="cnote">召集</span></button><button type="button" class="chip t-major" data-char="c-019"><span class="cid">c-019</span><span class="cname">継ぎ火の同僚【名未定】</span></button><button type="button" class="chip t-new" data-char="N-03"><span class="cid">N-03</span><span class="cname">討魔院の仲間（終盤まで共にする）</span></button><button type="button" class="chip t-major" data-char="c-003"><span class="cid">c-003</span><span class="cname">友人【名未定】</span></button><button type="button" class="chip t-new" data-char="N-09" title="名が立つ"><span class="cid">N-09</span><span class="cname">名のある魔王（破局の張本人）</span><i class="mk mk-first" title="初登場">初</i><i class="mk mk-kari" title="仮置き">仮</i><span class="cnote">名が立つ</span></button></div></dd></div>
+      <div class="row"><dt>伏線</dt><dd><div class="fbs"><button type="button" class="fb k-mid" data-f="F-003" title="大襲撃の原因＝裏組織の作為"><span class="fsym" aria-hidden="true">→</span><span class="fid">F-003</span><span class="fkind">中継</span><span class="flbl">戦争の裏の因果の匂わせ</span></button><button type="button" class="fb k-mid is-kari" data-f="F-008" title="第一部の仲間との前線再会"><span class="fsym" aria-hidden="true">→</span><span class="fid">F-008</span><span class="fkind">中継</span><span class="flbl">前触れ: 名簿の名</span><span class="fkari">仮</span></button></div></dd></div>
+      <div class="row"><dt>敵・壁</dt><dd>魔王たち（顔のない波）</dd></div>
+      <div class="row"><dt>波</dt><dd><span class="wave w-flat"><b aria-hidden="true">→</b>断面</span>断面（発つ朝）</dd></div>
+      <div class="row"><dt>エリーネ</dt><dd>22〜23・拠点</dd></div>
+      <div class="row"><dt>仮</dt><dd class="kari-text">名のある魔王の名が立つ位置／エリーネの戦時の務め。</dd></div>
+    </dl>
+  </article>
+</li>
+<li class="ch" id="ch-16" data-ch="16" data-part="3" data-chars="c-001 c-018 N-04 c-019 N-03 c-003 N-07 N-06 N-10" data-fs="F-008 F-004 F-007">
+  <div class="rail">
+    <span class="num">16</span>
+    <span class="age">22〜23歳</span>
+    <span class="year">1216〜17</span>
+  </div>
+  <article class="card">
+    <header class="card-head">
+      <span class="chlabel">三部4章<span class="through">通し16</span></span>
+      <h4>開戦と再会<span class="status">【仮題】</span></h4>
+    </header>
+    <p class="sum">開戦。テラは前線の剣（隊の指揮は主役にしない）。崩れかけた会の隊に横から入り、率いていた c-018 と再会して戦友になる（F-008 回収）。会の隊が退くとき、点呼に入っていない荷持ちの少年 N-04 を庇って救い、廃墟でガルドに拾われた構図を拾う側で反復する。N-07 学閥の指導者の指揮（広域の火の法術）が剣側と噛み合わず、テラの隊が火の向こうに取り残される【仮】（大襲撃の文法の反復）。火の中から隊を引き出す風の法術を撃ったのは、味方の法術隊にいる N-06——一部4章の挫折相手。言葉は交わさない【仮】。死者を出した夜、戦友たち（c-018・c-019・N-03）の弔い。</p>
+    <dl class="meta">
+      <div class="row"><dt>登場</dt><dd><div class="chips"><button type="button" class="chip t-main" data-char="c-001"><span class="cid">c-001</span><span class="cname">テラベール</span></button><button type="button" class="chip t-major" data-char="c-018" title="再登場・戦友に"><span class="cid">c-018</span><span class="cname">戦友【名未定】</span><span class="cnote">再登場・戦友に</span></button><button type="button" class="chip t-new" data-char="N-04" title="庇って救う"><span class="cid">N-04</span><span class="cname">次世代の少年兵（継承の相手）</span><i class="mk mk-first" title="初登場">初</i><span class="cnote">庇って救う</span></button><button type="button" class="chip t-major" data-char="c-019"><span class="cid">c-019</span><span class="cname">継ぎ火の同僚【名未定】</span></button><button type="button" class="chip t-new" data-char="N-03"><span class="cid">N-03</span><span class="cname">討魔院の仲間（終盤まで共にする）</span></button><button type="button" class="chip t-major" data-char="c-003"><span class="cid">c-003</span><span class="cname">友人【名未定】</span></button><button type="button" class="chip t-new" data-char="N-07" title="前線の指揮"><span class="cid">N-07</span><span class="cname">学閥の指導者（善意の改革者）</span><i class="mk mk-kari" title="仮置き">仮</i><span class="cnote">前線の指揮</span></button><button type="button" class="chip t-major" data-char="N-06" title="味方の法術隊として一度"><span class="cid">N-06</span><span class="cname">挫折相手（人間の法術使い）</span><i class="mk mk-kari" title="仮置き">仮</i><span class="cnote">味方の法術隊として一度</span></button><button type="button" class="chip t-new" data-char="N-10" title="志願隊の中に見える"><span class="cid">N-10</span><span class="cname">対比人物（今を生きられない者・月華流）</span><i class="mk mk-kari" title="仮置き">仮</i><span class="cnote">志願隊の中に見える</span></button></div></dd></div>
+      <div class="row"><dt>伏線</dt><dd><div class="fbs"><button type="button" class="fb k-get" data-f="F-008" title="第一部の仲間との前線再会"><span class="fsym" aria-hidden="true">●</span><span class="fid">F-008</span><span class="fkind">回収</span><span class="flbl">再会・戦友化</span></button><button type="button" class="fb k-mid" data-f="F-004" title="救うことでしか自分を許せない（後天の変質）"><span class="fsym" aria-hidden="true">→</span><span class="fid">F-004</span><span class="fkind">中継</span><span class="flbl">すり減り（不眠・食の細り）</span></button><button type="button" class="fb k-mid" data-f="F-007" title="盗み切れなかった最後の一手"><span class="fsym" aria-hidden="true">→</span><span class="fid">F-007</span><span class="fkind">中継</span></button></div></dd></div>
+      <div class="row"><dt>敵・壁</dt><dd>魔王たち</dd></div>
+      <div class="row"><dt>波</dt><dd><span class="wave w-up"><b aria-hidden="true">↑</b>希望へ</span>上り（再会・拾う）→ 損害の影</dd></div>
+      <div class="row"><dt>エリーネ</dt><dd>23〜24・拠点</dd></div>
+      <div class="row"><dt>仮</dt><dd class="kari-text">N-04 の年齢（10〜12歳目安）／N-07 の前線の関わり／N-06 の一手の形。</dd></div>
+    </dl>
+  </article>
+</li>
+<li class="ch" id="ch-17" data-ch="17" data-part="3" data-chars="c-001 c-004 N-05 N-04 c-019 N-03 c-003" data-fs="F-004">
+  <div class="rail">
+    <span class="num">17</span>
+    <span class="age">23歳</span>
+    <span class="year">1217</span>
+  </div>
+  <article class="card">
+    <header class="card-head">
+      <span class="chlabel">三部5章<span class="through">通し17</span></span>
+      <h4>一度だけ帰る<span class="status">【仮題】</span></h4>
+    </header>
+    <p class="sum">冬。魔物の動きが鈍り、討魔院は隊を回して補給と再編に入る。テラの隊は拠点の町へ数日戻る【仮】。N-04 も一緒。一度だけ帰る家——夜、家の窓に灯がある（エリーネが毎晩点けている）。戸を叩く。一〜二歳の子 N-05 は父を知らず、泣く。テラは飯を食い、眠る（食の細りと不眠が初めて戻る）。N-04 は土間で飯を食い、エリーネが二杯目をよそう。発つ朝、早馬。国境の都市【名未定】が N-09 の群れに包囲された。戸口でエリーネが先に言い、テラは受け取って出る。以後、約一年帰れない。</p>
+    <dl class="meta">
+      <div class="row"><dt>登場</dt><dd><div class="chips"><button type="button" class="chip t-main" data-char="c-001"><span class="cid">c-001</span><span class="cname">テラベール</span></button><button type="button" class="chip t-major" data-char="c-004" title="帰宅の場面・先に言う"><span class="cid">c-004</span><span class="cname">エリーネ</span><span class="cnote">帰宅の場面・先に言う</span></button><button type="button" class="chip t-new" data-char="N-05" title="帰宅の場面・一〜二歳"><span class="cid">N-05</span><span class="cname">テラとエリーネの子</span><span class="cnote">帰宅の場面・一〜二歳</span></button><button type="button" class="chip t-new" data-char="N-04" title="一緒に帰る"><span class="cid">N-04</span><span class="cname">次世代の少年兵（継承の相手）</span><span class="cnote">一緒に帰る</span></button><button type="button" class="chip t-major" data-char="c-019"><span class="cid">c-019</span><span class="cname">継ぎ火の同僚【名未定】</span></button><button type="button" class="chip t-new" data-char="N-03"><span class="cid">N-03</span><span class="cname">討魔院の仲間（終盤まで共にする）</span></button><button type="button" class="chip t-major" data-char="c-003" title="戸口の顔出し（隊の日程を聞く）"><span class="cid">c-003</span><span class="cname">友人【名未定】</span><i class="mk mk-kari" title="仮置き">仮</i><span class="cnote">戸口の顔出し（隊の日程を聞く）</span></button></div><p class="scenery">点景: 分署の顔・早馬</p></dd></div>
+      <div class="row"><dt>伏線</dt><dd><div class="fbs"><button type="button" class="fb k-mid" data-f="F-004" title="救うことでしか自分を許せない（後天の変質）"><span class="fsym" aria-hidden="true">→</span><span class="fid">F-004</span><span class="fkind">中継</span><span class="flbl">一度だけ受け取る（飯・眠り）</span></button></div></dd></div>
+      <div class="row"><dt>敵・壁</dt><dd>なし（帰宅）→ 早馬</dd></div>
+      <div class="row"><dt>波</dt><dd><span class="wave w-down"><b aria-hidden="true">↓</b>絶望へ</span>上り（家）→ 下りの入口（早馬）</dd></div>
+      <div class="row"><dt>エリーネ</dt><dd>24・拠点（一度だけの帰宅）</dd></div>
+      <div class="row"><dt>仮</dt><dd class="kari-text">帰る日数／帰宅中に事件を置くか（一章の密度）。</dd></div>
+    </dl>
+  </article>
+</li>
+<li class="ch" id="ch-18" data-ch="18" data-part="3" data-chars="c-001 c-018 c-003 N-03 c-019 N-04 N-09 N-08 N-10" data-fs="F-007 F-004 F-008 F-003">
+  <div class="rail">
+    <span class="num">18</span>
+    <span class="age">23〜24歳</span>
+    <span class="year">1217〜18</span>
+  </div>
+  <article class="card">
+    <header class="card-head">
+      <span class="chlabel">三部6章<span class="through">通し18</span></span>
+      <h4>落ちる都市<span class="status">【仮題】</span></h4>
+    </header>
+    <p class="sum">帰れない一年。場所はあるのに帰れない独り。隊に内通の疑いが生じ、N-03 が疑われる【確定方向・ミスリード】。救援に向かった大きな都市【仮名・未定】が目の前で落ちる——内通で流れた情報が待ち伏せと救援の遅れを招いた。c-003 の内通が露見する。魔剣の完成がその夜の喪失と重なり（人の代償）、灯器にヒビが入る（体の代償）。最後の一手が二度目に崩れ、戦友を救えない一因になる。c-018 が死ぬ。N-10 対比人物もこの夜、都市の門の内側で死ぬ【確定方向】。救えなかった名前が一夜で束になり、その中に戦友の名前。名を数え切れない朝【仮】。</p>
+    <dl class="meta">
+      <div class="row"><dt>登場</dt><dd><div class="chips"><button type="button" class="chip t-main" data-char="c-001"><span class="cid">c-001</span><span class="cname">テラベール</span></button><button type="button" class="chip t-major" data-char="c-018"><span class="cid">c-018</span><span class="cname">戦友【名未定】</span><i class="mk mk-death" title="死亡">†</i></button><button type="button" class="chip t-major" data-char="c-003" title="内通の露見"><span class="cid">c-003</span><span class="cname">友人【名未定】</span><span class="cnote">内通の露見</span></button><button type="button" class="chip t-new" data-char="N-03" title="もう一人の容疑者（ミスリード）"><span class="cid">N-03</span><span class="cname">討魔院の仲間（終盤まで共にする）</span><span class="cnote">もう一人の容疑者（ミスリード）</span></button><button type="button" class="chip t-major" data-char="c-019"><span class="cid">c-019</span><span class="cname">継ぎ火の同僚【名未定】</span></button><button type="button" class="chip t-new" data-char="N-04"><span class="cid">N-04</span><span class="cname">次世代の少年兵（継承の相手）</span></button><button type="button" class="chip t-new" data-char="N-09" title="都市を落とす（遠景）"><span class="cid">N-09</span><span class="cname">名のある魔王（破局の張本人）</span><span class="cnote">都市を落とす（遠景）</span></button><button type="button" class="chip t-new" data-char="N-08" title="待ち伏せの影"><span class="cid">N-08</span><span class="cname">仕事師（幹部の下の実務者）</span><span class="cnote">待ち伏せの影</span></button><button type="button" class="chip t-new" data-char="N-10" title="都市の門の内側で死ぬ"><span class="cid">N-10</span><span class="cname">対比人物（今を生きられない者・月華流）</span><i class="mk mk-death" title="死亡">†</i><span class="cnote">都市の門の内側で死ぬ</span></button></div></dd></div>
+      <div class="row"><dt>伏線</dt><dd><div class="fbs"><button type="button" class="fb k-mid" data-f="F-007" title="盗み切れなかった最後の一手"><span class="fsym" aria-hidden="true">→</span><span class="fid">F-007</span><span class="fkind">中継</span><span class="flbl">二度目の崩れ</span></button><button type="button" class="fb k-mid" data-f="F-004" title="救うことでしか自分を許せない（後天の変質）"><span class="fsym" aria-hidden="true">→</span><span class="fid">F-004</span><span class="fkind">中継</span><span class="flbl">極＝名前に潰される</span></button><button type="button" class="fb k-mid" data-f="F-008" title="第一部の仲間との前線再会"><span class="fsym" aria-hidden="true">→</span><span class="fid">F-008</span><span class="fkind">中継</span><span class="flbl">連動: c-018 死亡</span></button><button type="button" class="fb k-mid" data-f="F-003" title="大襲撃の原因＝裏組織の作為"><span class="fsym" aria-hidden="true">→</span><span class="fid">F-003</span><span class="fkind">中継</span><span class="flbl">戦場に残る誘引の指紋</span></button></div><p class="scenery">伏線表外: c-003 内通の露見</p></dd></div>
+      <div class="row"><dt>敵・壁</dt><dd>名のある魔王・人の手（仕事師）</dd></div>
+      <div class="row"><dt>波</dt><dd><span class="wave w-down"><b aria-hidden="true">↓</b>絶望へ</span>最深</dd></div>
+      <div class="row"><dt>エリーネ</dt><dd>24〜25・拠点（待つ側）</dd></div>
+      <div class="row"><dt>仮</dt><dd class="kari-text">都市の名／露見の場面の形／N-10 の死に方。</dd></div>
+    </dl>
+  </article>
+</li>
+<li class="ch" id="ch-19" data-ch="19" data-part="3" data-chars="c-001 N-09 N-08 c-003 N-03 c-019 N-04 N-02 c-004 N-05" data-fs="F-003 F-002 F-007">
+  <div class="rail">
+    <span class="num">19</span>
+    <span class="age">24〜25歳</span>
+    <span class="year">1218〜19</span>
+  </div>
+  <article class="card">
+    <header class="card-head">
+      <span class="chlabel">三部7章<span class="through">通し19</span></span>
+      <h4>名のある魔王<span class="status">【仮題】</span></h4>
+    </header>
+    <p class="sum">報いの追撃。完成した魔剣で N-09 を討つ（代償は体・人・制約の三つ重ね。常時は使えない）。だが戦友は帰らず、戦争は止まらない。内通の線から N-08 仕事師が姿を見せ、交戦する。真相の端緒は二本——露見した c-003 の口（知っている範囲だけ）と、約定院の監査が拾う戦場の誘引の指紋。大襲撃・死体場面・戦争が同じ指紋で串になり、「裏に災厄がいる」の読みが補強される（組織の偽装）。波が退くように戦線が静まり、誰も理由を説明できない。不気味な静けさの中、拠点へ帰る。</p>
+    <dl class="meta">
+      <div class="row"><dt>登場</dt><dd><div class="chips"><button type="button" class="chip t-main" data-char="c-001"><span class="cid">c-001</span><span class="cname">テラベール</span></button><button type="button" class="chip t-new" data-char="N-09" title="討たれる"><span class="cid">N-09</span><span class="cname">名のある魔王（破局の張本人）</span><i class="mk mk-death" title="死亡">†</i><span class="cnote">討たれる</span></button><button type="button" class="chip t-new" data-char="N-08" title="姿を見せる・交戦"><span class="cid">N-08</span><span class="cname">仕事師（幹部の下の実務者）</span><i class="mk mk-first" title="初登場">初</i><span class="cnote">姿を見せる・交戦</span></button><button type="button" class="chip t-major" data-char="c-003" title="捕らわれ・口を開く。以後は捕らわれ"><span class="cid">c-003</span><span class="cname">友人【名未定】</span><i class="mk mk-exit" title="退場">退</i><i class="mk mk-kari" title="仮置き">仮</i><span class="cnote">捕らわれ・口を開く。以後は捕らわれ</span></button><button type="button" class="chip t-new" data-char="N-03" title="疑いが晴れる"><span class="cid">N-03</span><span class="cname">討魔院の仲間（終盤まで共にする）</span><span class="cnote">疑いが晴れる</span></button><button type="button" class="chip t-major" data-char="c-019"><span class="cid">c-019</span><span class="cname">継ぎ火の同僚【名未定】</span></button><button type="button" class="chip t-new" data-char="N-04"><span class="cid">N-04</span><span class="cname">次世代の少年兵（継承の相手）</span></button><button type="button" class="chip t-new" data-char="N-02"><span class="cid">N-02</span><span class="cname">討魔院の長（正論の人）</span></button><button type="button" class="chip t-major" data-char="c-004" title="帰還を迎える"><span class="cid">c-004</span><span class="cname">エリーネ</span><span class="cnote">帰還を迎える</span></button><button type="button" class="chip t-new" data-char="N-05" title="帰還を迎える"><span class="cid">N-05</span><span class="cname">テラとエリーネの子</span><span class="cnote">帰還を迎える</span></button></div><p class="scenery">点景: 約定院の監査官</p></dd></div>
+      <div class="row"><dt>伏線</dt><dd><div class="fbs"><button type="button" class="fb k-mid" data-f="F-003" title="大襲撃の原因＝裏組織の作為"><span class="fsym" aria-hidden="true">→</span><span class="fid">F-003</span><span class="fkind">中継</span><span class="flbl">端緒二本立て</span></button><button type="button" class="fb k-mid" data-f="F-002" title="崩壊の真相は二層"><span class="fsym" aria-hidden="true">→</span><span class="fid">F-002</span><span class="fkind">中継</span><span class="flbl">裏層の端緒</span></button><button type="button" class="fb k-mid" data-f="F-007" title="盗み切れなかった最後の一手"><span class="fsym" aria-hidden="true">→</span><span class="fid">F-007</span><span class="fkind">中継</span><span class="flbl">未完のまま</span></button></div><p class="scenery">ダミー線（裏に災厄がいる）の補強</p></dd></div>
+      <div class="row"><dt>敵・壁</dt><dd>名のある魔王（討つ）／仕事師</dd></div>
+      <div class="row"><dt>波</dt><dd><span class="wave w-flat"><b aria-hidden="true">→</b>断面</span>上りとむなしさ → 不穏</dd></div>
+      <div class="row"><dt>エリーネ</dt><dd>25〜26・拠点（帰還を迎える）</dd></div>
+      <div class="row"><dt>仮</dt><dd class="kari-text">仕事師の交戦の決着（逃す／捕らえる）／監査官を点景に留めるか。</dd></div>
+    </dl>
+  </article>
+</li></ol>
+</section>
+    
+<aside class="band" data-band="3" data-part="3">
+  <h4>三部末 → 四部頭<span>部の末尾の状態＝次の部の冒頭の状態</span></h4>
+  <ul><li>約3年の跳び。テラ28歳。魔剣は完成（灯器のヒビ・常時は使えない制約）。</li><li>c-018 と N-10 は死亡（落ちる都市）。c-003 は露見し、口を開いた範囲の個人の線がある。名のある魔王 N-09 を討った（任命の根拠）。</li><li>戦争は不気味に収束した。「裏に災厄がいる」の読みはテラにも読者にも生きている（組織の偽装）。幹部四人は未判明。仕事師の姿は見た。</li><li>N-04 は育った姿でテラのそば。子 N-05 は6歳。エリーネは拠点で待つ側。</li><li>四部1章は取り戻した日常と静かな警戒から始め、c-020 の来訪で動く。</li></ul>
+</aside>
+    <div class="jump" id="jump">
+      <div class="rail"><span class="num">跳び</span></div>
+      <p>約3年の跳び——オーデリア暦 1219〜22。不穏な平和。テラ25歳→28歳、子 N-05 は6歳に。</p>
+    </div>
+    
+<section class="part" id="part-4" data-part="4">
+  <header class="part-head">
+    <div class="part-stage" aria-hidden="true">結</div>
+    <div>
+      <h3>第四部 壮年期<span class="part-count">6章【確定方向】</span></h3>
+      <p class="part-q"><span>部の問い</span>世界か、目の前の人か。今を生きるの最終試験。</p>
+      <p class="part-line"><span>部の一言</span>百年ぶりの継承者になった男が、あの夜の獣と向き合い、死んで救う側へ傾いた最後の一手を仲間に止められる。</p>
+    </div>
+  </header>
+  <ol class="chapters">
+<li class="ch" id="ch-20" data-ch="20" data-part="4" data-chars="c-001 c-020 c-004 N-05 N-04 c-019 N-03" data-fs="F-007 F-003">
+  <div class="rail">
+    <span class="num">20</span>
+    <span class="age">28歳</span>
+    <span class="year">1222</span>
+  </div>
+  <article class="card">
+    <header class="card-head">
+      <span class="chlabel">四部1章<span class="through">通し20</span></span>
+      <h4>兆しを読む者<span class="status">【仮題】</span></h4>
+    </header>
+    <p class="sum">約三年の跳びの後。町ではガルドに似た、気配のない、よく喋る男。子 N-05 は六歳（灯見の儀は四部の中で受ける）。N-04 は育った姿でそばにいて、背から盗む関係ができている。説明のつかない平和への静かな警戒。c-020 が戦場の噂の剣筋（自流派の型）を辿って訪ねてくる。ガルドの死をこの人物がここで知り、遺体のないガルドの弔い（墓も遺品もない）と継承が一つの場面になる。テラは流派の真の名（厄滅継天流）・存在理由・正式な技・奥義を知る（正式継承）。「災厄は湧かない、育つ」——三部の収束は収穫が近い印だったと知る。両教からの使者の断面【仮】。</p>
+    <dl class="meta">
+      <div class="row"><dt>登場</dt><dd><div class="chips"><button type="button" class="chip t-main" data-char="c-001"><span class="cid">c-001</span><span class="cname">テラベール</span></button><button type="button" class="chip t-key" data-char="c-020" title="正式継承を授ける"><span class="cid">c-020</span><span class="cname">継承者【名未定】</span><i class="mk mk-first" title="初登場">初</i><span class="cnote">正式継承を授ける</span></button><button type="button" class="chip t-major" data-char="c-004"><span class="cid">c-004</span><span class="cname">エリーネ</span></button><button type="button" class="chip t-new" data-char="N-05" title="六歳"><span class="cid">N-05</span><span class="cname">テラとエリーネの子</span><span class="cnote">六歳</span></button><button type="button" class="chip t-new" data-char="N-04" title="育った姿"><span class="cid">N-04</span><span class="cname">次世代の少年兵（継承の相手）</span><span class="cnote">育った姿</span></button><button type="button" class="chip t-major" data-char="c-019"><span class="cid">c-019</span><span class="cname">継ぎ火の同僚【名未定】</span></button><button type="button" class="chip t-new" data-char="N-03"><span class="cid">N-03</span><span class="cname">討魔院の仲間（終盤まで共にする）</span></button></div></dd></div>
+      <div class="row"><dt>伏線</dt><dd><div class="fbs"><button type="button" class="fb k-mid" data-f="F-007" title="盗み切れなかった最後の一手"><span class="fsym" aria-hidden="true">→</span><span class="fid">F-007</span><span class="fkind">中継</span><span class="flbl">教わる橋</span></button><button type="button" class="fb k-mid" data-f="F-003" title="大襲撃の原因＝裏組織の作為"><span class="fsym" aria-hidden="true">→</span><span class="fid">F-003</span><span class="fkind">中継</span><span class="flbl">兆し: 災厄は育つ</span></button></div><p class="scenery">回収: c-002 の未開示（真の流派の名）</p></dd></div>
+      <div class="row"><dt>敵・壁</dt><dd>なし（不穏）</dd></div>
+      <div class="row"><dt>波</dt><dd><span class="wave w-up"><b aria-hidden="true">↑</b>希望へ</span>静かな上り</dd></div>
+      <div class="row"><dt>エリーネ</dt><dd>29・拠点</dd></div>
+      <div class="row"><dt>仮</dt><dd class="kari-text">c-020 の来訪の形／使者の断面。</dd></div>
+    </dl>
+  </article>
+</li>
+<li class="ch" id="ch-21" data-ch="21" data-part="4" data-chars="c-001 c-016 c-004 N-02 N-07" data-fs="F-012 F-002 F-003">
+  <div class="rail">
+    <span class="num">21</span>
+    <span class="age">28歳</span>
+    <span class="year">1222</span>
+  </div>
+  <article class="card">
+    <header class="card-head">
+      <span class="chlabel">四部2章<span class="through">通し21</span></span>
+      <h4>二つの火<span class="status">【仮題】</span></h4>
+    </header>
+    <p class="sum">会府アコルダ【確定方向】で、大御灯と火元が揃い、分灯の儀で二つの火を一つの灯に合わせて点す。テラの魔剣に教会の紋章を刻む。呼び名は「N-09 の名＋の継承者」、民の口では「継承者様」。制度が百年ぶりに動く重さ（世界が「制度では足りない」と認めた事件）。継承者として、同じアコルダの対魔連盟議会へ。c-016 時止まりの王と接点（無害な顔で一度通る）。法術院本院の足場と約定院の監査の線が繋がり、c-003 の口から得た個人の線と合わせて四本の糸が揃う。糸は二部6章の死体場面の記憶を指す。</p>
+    <dl class="meta">
+      <div class="row"><dt>登場</dt><dd><div class="chips"><button type="button" class="chip t-main" data-char="c-001"><span class="cid">c-001</span><span class="cname">テラベール</span></button><button type="button" class="chip t-key" data-char="c-016" title="議会での接点"><span class="cid">c-016</span><span class="cname">時止まりの王【名未定】</span><i class="mk mk-first" title="初登場">初</i><span class="cnote">議会での接点</span></button><button type="button" class="chip t-major" data-char="c-004"><span class="cid">c-004</span><span class="cname">エリーネ</span></button><button type="button" class="chip t-new" data-char="N-02" title="制度の線"><span class="cid">N-02</span><span class="cname">討魔院の長（正論の人）</span><span class="cnote">制度の線</span></button><button type="button" class="chip t-new" data-char="N-07" title="議会"><span class="cid">N-07</span><span class="cname">学閥の指導者（善意の改革者）</span><i class="mk mk-kari" title="仮置き">仮</i><span class="cnote">議会</span></button></div><p class="scenery">点景: 両教の長（大御灯・火元）・約定院の監査官</p></dd></div>
+      <div class="row"><dt>伏線</dt><dd><div class="fbs"><button type="button" class="fb k-mid" data-f="F-012" title="死体場面の四つの指紋"><span class="fsym" aria-hidden="true">→</span><span class="fid">F-012</span><span class="fkind">中継</span><span class="flbl">糸が揃う</span></button><button type="button" class="fb k-mid" data-f="F-002" title="崩壊の真相は二層"><span class="fsym" aria-hidden="true">→</span><span class="fid">F-002</span><span class="fkind">中継</span><span class="flbl">制度の線</span></button><button type="button" class="fb k-mid" data-f="F-003" title="大襲撃の原因＝裏組織の作為"><span class="fsym" aria-hidden="true">→</span><span class="fid">F-003</span><span class="fkind">中継</span><span class="flbl">制度の線</span></button></div></dd></div>
+      <div class="row"><dt>敵・壁</dt><dd>なし（政治）</dd></div>
+      <div class="row"><dt>波</dt><dd><span class="wave w-up"><b aria-hidden="true">↑</b>希望へ</span>上り（重さ）</dd></div>
+      <div class="row"><dt>エリーネ</dt><dd>29・拠点／任命式（アコルダ）</dd></div>
+      <div class="row"><dt>仮</dt><dd class="kari-text">元火の在り処【未定】／紋章の意匠【未定】／議会の場面の形。</dd></div>
+    </dl>
+  </article>
+</li>
+<li class="ch" id="ch-22" data-ch="22" data-part="4" data-chars="c-001 c-015 c-016 c-017 c-013 N-08 N-03 c-019 N-04 N-02" data-fs="F-012 F-010 F-003 F-002">
+  <div class="rail">
+    <span class="num">22</span>
+    <span class="age">28〜29歳</span>
+    <span class="year">1222〜23</span>
+  </div>
+  <article class="card">
+    <header class="card-head">
+      <span class="chlabel">四部3章<span class="through">通し22</span></span>
+      <h4>一斉回収<span class="status">【仮題】</span></h4>
+    </header>
+    <p class="sum">死体場面の再読——安らかな死に顔（A の看取り）・腐らない体（B の時とめ）・空の灯器（C の収穫）・世話の跡（D の手）。四人の正体が同時に判明し、「災厄の線は組織の偽装だった」。A は孤児院、B は議会、C は故郷の跡地、D は職業の場で、無害な顔で一度ずつ通っていた。幹部の処遇【仮】: A は孤児院で救いを完成させようとし、B は議会で失脚して眠らせ続けた妻の時が動き、D は庭にいる。仕事師 N-08・実行役と交戦し、c-013 リヴェルの顔（組織の監視）が割れる。敵は人間の組織——と固まる。庭の在り処＝ハルベック近郊の山野。</p>
+    <dl class="meta">
+      <div class="row"><dt>登場</dt><dd><div class="chips"><button type="button" class="chip t-main" data-char="c-001"><span class="cid">c-001</span><span class="cname">テラベール</span></button><button type="button" class="chip t-key" data-char="c-015" title="正体判明"><span class="cid">c-015</span><span class="cname">皆救い【名未定】</span><span class="cnote">正体判明</span></button><button type="button" class="chip t-key" data-char="c-016" title="正体判明"><span class="cid">c-016</span><span class="cname">時止まりの王【名未定】</span><span class="cnote">正体判明</span></button><button type="button" class="chip t-key" data-char="c-017" title="正体判明"><span class="cid">c-017</span><span class="cname">育ての親【名未定】</span><span class="cnote">正体判明</span></button><button type="button" class="chip t-key" data-char="c-013" title="顔が割れる"><span class="cid">c-013</span><span class="cname">リヴェル（側近・学徒）</span><span class="cnote">顔が割れる</span></button><button type="button" class="chip t-new" data-char="N-08" title="交戦"><span class="cid">N-08</span><span class="cname">仕事師（幹部の下の実務者）</span><span class="cnote">交戦</span></button><button type="button" class="chip t-new" data-char="N-03"><span class="cid">N-03</span><span class="cname">討魔院の仲間（終盤まで共にする）</span></button><button type="button" class="chip t-major" data-char="c-019"><span class="cid">c-019</span><span class="cname">継ぎ火の同僚【名未定】</span></button><button type="button" class="chip t-new" data-char="N-04"><span class="cid">N-04</span><span class="cname">次世代の少年兵（継承の相手）</span></button><button type="button" class="chip t-new" data-char="N-02"><span class="cid">N-02</span><span class="cname">討魔院の長（正論の人）</span></button></div></dd></div>
+      <div class="row"><dt>伏線</dt><dd><div class="fbs"><button type="button" class="fb k-get" data-f="F-012" title="死体場面の四つの指紋"><span class="fsym" aria-hidden="true">●</span><span class="fid">F-012</span><span class="fkind">回収</span><span class="flbl">四枚におろす</span></button><button type="button" class="fb k-get" data-f="F-010" title="側近の獣の強い一筆"><span class="fsym" aria-hidden="true">●</span><span class="fid">F-010</span><span class="fkind">回収</span><span class="flbl">獣の正体判明</span></button><button type="button" class="fb k-get" data-f="F-003" title="大襲撃の原因＝裏組織の作為"><span class="fsym" aria-hidden="true">●</span><span class="fid">F-003</span><span class="fkind">回収</span><span class="flbl">一段目: 偽装だった</span></button><button type="button" class="fb k-mid" data-f="F-002" title="崩壊の真相は二層"><span class="fsym" aria-hidden="true">→</span><span class="fid">F-002</span><span class="fkind">中継</span><span class="flbl">裏層: 組織の関与まで（最後の一片は残す）</span></button></div></dd></div>
+      <div class="row"><dt>敵・壁</dt><dd>人間の組織</dd></div>
+      <div class="row"><dt>波</dt><dd><span class="wave w-down"><b aria-hidden="true">↓</b>絶望へ</span>戦慄（下り）</dd></div>
+      <div class="row"><dt>エリーネ</dt><dd>29〜30・拠点</dd></div>
+      <div class="row"><dt>仮</dt><dd class="kari-text">幹部三人の個別の結末／庭師の初代の紋章入り武器を指紋にする案。</dd></div>
+    </dl>
+  </article>
+</li>
+<li class="ch" id="ch-23" data-ch="23" data-part="4" data-chars="c-001 c-014 c-017 c-012 c-019 N-03 N-04" data-fs="F-011 F-002 F-006">
+  <div class="rail">
+    <span class="num">23</span>
+    <span class="age">29歳</span>
+    <span class="year">1223</span>
+  </div>
+  <article class="card">
+    <header class="card-head">
+      <span class="chlabel">四部4章<span class="through">通し23</span></span>
+      <h4>故郷の廃墟<span class="status">【仮題】</span></h4>
+    </header>
+    <p class="sum">継承者として、戦友たち（c-019・N-03・N-04・討魔院の隊）と本丸へ。道行きで故郷の廃墟を通る（十九年ぶり・F-011 回収）。崩壊の最後のピース（組織がどこまで崩壊に絡んでいたか）をクライマックス直前に知る（運び手は c-012 オスカの最後の証言【確定方向】）。庭へ踏み込む。世話の跡。c-014 庭師と対峙——直接対決のつもりだった。庭師は名を呼ばず「あなた」、口癖は「少し、手を入れましょう」。収穫のとき。庭師は奥義の転用で自分の命を錬成の触媒にし、実りを完成させて果てる（継ぎ火の言う最も尊い死の形と重なる皮肉）。</p>
+    <dl class="meta">
+      <div class="row"><dt>登場</dt><dd><div class="chips"><button type="button" class="chip t-main" data-char="c-001"><span class="cid">c-001</span><span class="cname">テラベール</span></button><button type="button" class="chip t-major" data-char="c-014" title="最期＝収穫"><span class="cid">c-014</span><span class="cname">庭師【名未定】</span><i class="mk mk-death" title="死亡">†</i><span class="cnote">最期＝収穫</span></button><button type="button" class="chip t-key" data-char="c-017" title="庭にいる"><span class="cid">c-017</span><span class="cname">育ての親【名未定】</span><i class="mk mk-kari" title="仮置き">仮</i><span class="cnote">庭にいる</span></button><button type="button" class="chip t-key" data-char="c-012" title="最後の証言"><span class="cid">c-012</span><span class="cname">オスカ（側近・恩義）</span><span class="cnote">最後の証言</span></button><button type="button" class="chip t-major" data-char="c-019"><span class="cid">c-019</span><span class="cname">継ぎ火の同僚【名未定】</span></button><button type="button" class="chip t-new" data-char="N-03"><span class="cid">N-03</span><span class="cname">討魔院の仲間（終盤まで共にする）</span></button><button type="button" class="chip t-new" data-char="N-04"><span class="cid">N-04</span><span class="cname">次世代の少年兵（継承の相手）</span></button></div><p class="scenery">点景: 討魔院の隊</p></dd></div>
+      <div class="row"><dt>伏線</dt><dd><div class="fbs"><button type="button" class="fb k-get" data-f="F-011" title="少年期の縁の場所（ハルベック近郊の山野）"><span class="fsym" aria-hidden="true">●</span><span class="fid">F-011</span><span class="fkind">回収</span><span class="flbl">故郷の廃墟</span></button><button type="button" class="fb k-get" data-f="F-002" title="崩壊の真相は二層"><span class="fsym" aria-hidden="true">●</span><span class="fid">F-002</span><span class="fkind">回収</span><span class="flbl">裏層の完結（運び手 c-012）</span></button><button type="button" class="fb k-mid is-kari" data-f="F-006" title="童話の一節が真相と符合"><span class="fsym" aria-hidden="true">→</span><span class="fid">F-006</span><span class="fkind">中継</span><span class="flbl">童話の一節がよぎる</span><span class="fkari">仮</span></button></div></dd></div>
+      <div class="row"><dt>敵・壁</dt><dd>庭師（元継承者）</dd></div>
+      <div class="row"><dt>波</dt><dd><span class="wave w-down"><b aria-hidden="true">↓</b>絶望へ</span>下り（庭の静けさ）</dd></div>
+      <div class="row"><dt>エリーネ</dt><dd>30・拠点（待つ側）</dd></div>
+      <div class="row"><dt>仮</dt><dd class="kari-text">庭師の戦い方（初代直伝の技か法術か【未定】）。</dd></div>
+    </dl>
+  </article>
+</li>
+<li class="ch" id="ch-24" data-ch="24" data-part="4" data-chars="c-001 N-04 c-019 N-03 N-06" data-fs="F-007 F-004 F-006 F-010 F-003">
+  <div class="rail">
+    <span class="num">24</span>
+    <span class="age">29歳</span>
+    <span class="year">1223</span>
+  </div>
+  <article class="card">
+    <header class="card-head">
+      <span class="chlabel">四部5章<span class="through">通し24</span></span>
+      <h4>実り<span class="status">【仮題】</span></h4>
+    </header>
+    <p class="sum">偽物と暴いたはずの災厄が、本物になって立つ。あの夜、目が合った獣。災厄は魔法を放つ。皆で道を開き、N-04 がテラの背から盗んだ動きで道を開く（継承の証明）。道の先の一太刀＝締めの一手の完成（二度の失敗の後の三度目）。その一撃の中でテラは奥義を一線まで使い、帰りを待つ人を知りながら「死んで救う」側へ傾く（師の信条の濁った継承）。本当に死ぬ寸前、戦友たち複数（c-019・N-03・N-06【仮】ほか）が体で止める（F-004 完了・台詞でなく事件で）。童話「魔法と剣」の一節（騎士の最後の一振り）が符合する【仮】。勝利は本物。倒れたテラを支える手。</p>
+    <dl class="meta">
+      <div class="row"><dt>登場</dt><dd><div class="chips"><button type="button" class="chip t-main" data-char="c-001"><span class="cid">c-001</span><span class="cname">テラベール</span></button><button type="button" class="chip t-new" data-char="N-04" title="道を開く（止め手にしない）"><span class="cid">N-04</span><span class="cname">次世代の少年兵（継承の相手）</span><span class="cnote">道を開く（止め手にしない）</span></button><button type="button" class="chip t-major" data-char="c-019" title="止め手"><span class="cid">c-019</span><span class="cname">継ぎ火の同僚【名未定】</span><span class="cnote">止め手</span></button><button type="button" class="chip t-new" data-char="N-03" title="止め手"><span class="cid">N-03</span><span class="cname">討魔院の仲間（終盤まで共にする）</span><span class="cnote">止め手</span></button><button type="button" class="chip t-major" data-char="N-06" title="止め手の一人"><span class="cid">N-06</span><span class="cname">挫折相手（人間の法術使い）</span><i class="mk mk-kari" title="仮置き">仮</i><span class="cnote">止め手の一人</span></button></div><p class="scenery">点景: 討魔院の隊</p></dd></div>
+      <div class="row"><dt>伏線</dt><dd><div class="fbs"><button type="button" class="fb k-get" data-f="F-007" title="盗み切れなかった最後の一手"><span class="fsym" aria-hidden="true">●</span><span class="fid">F-007</span><span class="fkind">回収</span><span class="flbl">完成＝道の先の一太刀</span></button><button type="button" class="fb k-get" data-f="F-004" title="救うことでしか自分を許せない（後天の変質）"><span class="fsym" aria-hidden="true">●</span><span class="fid">F-004</span><span class="fkind">回収</span><span class="flbl">完了＝体で止める</span></button><button type="button" class="fb k-get is-kari" data-f="F-006" title="童話の一節が真相と符合"><span class="fsym" aria-hidden="true">●</span><span class="fid">F-006</span><span class="fkind">回収</span><span class="flbl">騎士の最後の一振り</span><span class="fkari">仮</span></button><button type="button" class="fb k-get" data-f="F-010" title="側近の獣の強い一筆"><span class="fsym" aria-hidden="true">●</span><span class="fid">F-010</span><span class="fkind">回収</span><span class="flbl">獣が立つ</span></button><button type="button" class="fb k-get" data-f="F-003" title="大襲撃の原因＝裏組織の作為"><span class="fsym" aria-hidden="true">●</span><span class="fid">F-003</span><span class="fkind">回収</span><span class="flbl">二段目: 本物が立つ</span></button></div></dd></div>
+      <div class="row"><dt>敵・壁</dt><dd>今代の災厄（大襲撃のボスの側近だった獣。裏組織が「実り」として育てた）</dd></div>
+      <div class="row"><dt>波</dt><dd><span class="wave w-up"><b aria-hidden="true">↑</b>希望へ</span>底 → 勝利</dd></div>
+      <div class="row"><dt>エリーネ</dt><dd>30・拠点</dd></div>
+      <div class="row"><dt>仮</dt><dd class="kari-text">F-006 の回収位置（四部4章末でも可）／止め手の顔ぶれ（N-06 を入れるか）。</dd></div>
+    </dl>
+  </article>
+</li>
+<li class="ch" id="ch-25" data-ch="25" data-part="4" data-chars="c-001 c-004 N-05 N-04 c-019 N-03 N-01 c-005 c-006" data-fs="F-009">
+  <div class="rail">
+    <span class="num">25</span>
+    <span class="age">29〜30歳</span>
+    <span class="year">1223〜24</span>
+  </div>
+  <article class="card">
+    <header class="card-head">
+      <span class="chlabel">四部6章<span class="through">通し25</span></span>
+      <h4>庭と書付<span class="status">【仮題】</span></h4>
+    </header>
+    <p class="sum">戦いの終わった庭に立つ。世話の跡。書付——初代への報告文の体で、師の死後も書き続けていたもの。最後の一枚にだけ、苗と呼んでいた全員の名が並ぶ。庭師の芯は証言でなく庭と書付で開き、誰も説明しない。根因（なぜ災厄が生まれ続けるのか）は開かれた謎のまま残る。帰りを待つ人の中へ帰る（エリーネ・N-05）。家には憧れの品（F-009）がある。名前を数えることから自由になる。N-04 へ正式に手渡す（盗む側から盗まれる側へ）。「人々は彼らをこう呼ぶ。継承者と」。</p>
+    <dl class="meta">
+      <div class="row"><dt>登場</dt><dd><div class="chips"><button type="button" class="chip t-main" data-char="c-001"><span class="cid">c-001</span><span class="cname">テラベール</span></button><button type="button" class="chip t-major" data-char="c-004"><span class="cid">c-004</span><span class="cname">エリーネ</span></button><button type="button" class="chip t-new" data-char="N-05" title="七〜八歳"><span class="cid">N-05</span><span class="cname">テラとエリーネの子</span><span class="cnote">七〜八歳</span></button><button type="button" class="chip t-new" data-char="N-04" title="手渡し"><span class="cid">N-04</span><span class="cname">次世代の少年兵（継承の相手）</span><span class="cnote">手渡し</span></button><button type="button" class="chip t-major" data-char="c-019"><span class="cid">c-019</span><span class="cname">継ぎ火の同僚【名未定】</span></button><button type="button" class="chip t-new" data-char="N-03"><span class="cid">N-03</span><span class="cname">討魔院の仲間（終盤まで共にする）</span></button><button type="button" class="chip t-new" data-char="N-01"><span class="cid">N-01</span><span class="cname">兄姉（兄と姉・二人一組）</span><i class="mk mk-kari" title="仮置き">仮</i></button><button type="button" class="chip t-sub" data-char="c-005" title="戦後の再会"><span class="cid">c-005</span><span class="cname">ロルフ</span><i class="mk mk-kari" title="仮置き">仮</i><span class="cnote">戦後の再会</span></button><button type="button" class="chip t-sub" data-char="c-006" title="戦後の再会"><span class="cid">c-006</span><span class="cname">ニコ</span><i class="mk mk-kari" title="仮置き">仮</i><span class="cnote">戦後の再会</span></button></div></dd></div>
+      <div class="row"><dt>伏線</dt><dd><div class="fbs"><button type="button" class="fb k-get" data-f="F-009" title="法術への憧れの品"><span class="fsym" aria-hidden="true">●</span><span class="fid">F-009</span><span class="fkind">回収</span><span class="flbl">家の錨</span></button></div><p class="scenery">回収: 庭師の芯（庭と書付）／開かれた謎（三軸五つ＋災神のダミー線）は残す</p></dd></div>
+      <div class="row"><dt>敵・壁</dt><dd>なし</dd></div>
+      <div class="row"><dt>波</dt><dd><span class="wave w-up"><b aria-hidden="true">↑</b>希望へ</span>上り（戦後）</dd></div>
+      <div class="row"><dt>エリーネ</dt><dd>30〜31・家</dd></div>
+      <div class="row"><dt>仮</dt><dd class="kari-text">兄姉・ロルフ・ニコの再登場の有無。</dd></div>
+    </dl>
+  </article>
+</li></ol>
+</section>
+  </div>
+</section>
+
+<section class="sec" id="fmap">
+  <div class="wrap">
+    <h2>伏線マップ</h2>
+    <p class="lead">F-001〜F-012 の設置・中継・回収。位置は「部・章」。正本は <code>設計/プロット/全体/伏線管理.md</code>。行をクリックすると、その伏線が動く章だけが年表に残る。</p>
+    <div class="scroll">
+      <table class="fmap">
+        <thead><tr><th>ID</th><th>中身</th><th>設置</th><th>中継</th><th>回収</th><th>状態</th></tr></thead>
+        <tbody><tr data-f="F-001">
+  <th scope="row"><button type="button" class="fname" data-f="F-001">F-001</button></th>
+  <td class="fbody">真の動機＝人を救うこと（本人未自覚）</td>
+  <td class="f-set">一部1章（話5 の土台）・2章（最初の齟齬）・3章（約束と生存率の理屈）</td>
+  <td class="f-mid">4〜5章（行動と説明のずれを積む）</td>
+  <td class="f-get">一部6章（事件＋c-003 の一言。解釈はテラ自身）</td>
+  <td class="f-st">設計済み</td>
+</tr><tr data-f="F-002">
+  <th scope="row"><button type="button" class="fname" data-f="F-002">F-002</button></th>
+  <td class="fbody">崩壊の真相は二層</td>
+  <td class="f-set">一部1章（種1〜7）</td>
+  <td class="f-mid">一部2章（種8・ガルドの述懐）→ 表層回収＝二部3章（点灯夫の証言【仮】）→ 二部6章（法術師の末路）→ 三部7章（裏層の端緒）</td>
+  <td class="f-get">裏層の最後のピース＝四部4章（クライマックス直前・運び手は c-012 オスカ【確定方向】）</td>
+  <td class="f-st">設計済み</td>
+</tr><tr data-f="F-003">
+  <th scope="row"><button type="button" class="fname" data-f="F-003">F-003</button></th>
+  <td class="fbody">大襲撃の原因＝裏組織の作為</td>
+  <td class="f-set">一部6章（原因不明のまま）</td>
+  <td class="f-mid">三部1〜2章（仕事師の指紋【仮】）→ 三部6章（戦場の誘引の指紋）→ 三部7章（端緒二本立て）</td>
+  <td class="f-get">四部3章（偽装だった）→ 四部5章（本物が立つ）</td>
+  <td class="f-st">設計中</td>
+</tr><tr data-f="F-004">
+  <th scope="row"><button type="button" class="fname" data-f="F-004">F-004</button></th>
+  <td class="fbody">救うことでしか自分を許せない（後天の変質）</td>
+  <td class="f-set">一部1章（種＝何もしなかった）</td>
+  <td class="f-mid">一部3・5章（取り分を渡す・受け取れない）→ 二部1・3・5章（変質）→ 二部6章（最初の転回・看病と独り言の告白）→ 三部2章（折り返し・求婚）→ 三部6章（極）</td>
+  <td class="f-get">四部5章（戦友たちが体で止める）</td>
+  <td class="f-st">設計中</td>
+</tr><tr data-f="F-005">
+  <th scope="row"><button type="button" class="fname" data-f="F-005">F-005</button></th>
+  <td class="fbody">半年の空白</td>
+  <td class="f-set">一部1章（前日譚）</td>
+  <td class="f-mid">二部2章（部分回収）</td>
+  <td class="f-get">二部4章（本回収・交換）。告白＝二部6章・求婚＝三部2章は F-005 の外側の後日</td>
+  <td class="f-st">設計済み</td>
+</tr><tr data-f="F-006">
+  <th scope="row"><button type="button" class="fname" data-f="F-006">F-006</button></th>
+  <td class="fbody">童話の一節が真相と符合</td>
+  <td class="f-set">一部1章（話12）</td>
+  <td class="f-mid">四部4章（よぎる【仮】）</td>
+  <td class="f-get">四部5章【仮・範囲は三部終盤〜四部】</td>
+  <td class="f-st">一節の文言【未定】</td>
+</tr><tr data-f="F-007">
+  <th scope="row"><button type="button" class="fname" data-f="F-007">F-007</button></th>
+  <td class="fbody">盗み切れなかった最後の一手</td>
+  <td class="f-set">一部2章（一度見せる）・6章（大狼を討つ一手を最後に見て失われる）</td>
+  <td class="f-mid">二部6章（一度目の崩れ）→ 三部6章（二度目の崩れ）→ 四部1章（c-020 から正式に教わる橋）</td>
+  <td class="f-get">四部5章（道の先の一太刀＝完成）</td>
+  <td class="f-st">設計済み</td>
+</tr><tr data-f="F-008">
+  <th scope="row"><button type="button" class="fname" data-f="F-008">F-008</button></th>
+  <td class="fbody">第一部の仲間との前線再会</td>
+  <td class="f-set">一部3章（c-018 初出）</td>
+  <td class="f-mid">三部3章（名簿の名【仮】）</td>
+  <td class="f-get">三部4章（再会・戦友化）→ 三部6章（破局の喪失と連動・c-018 死亡）</td>
+  <td class="f-st">設計中</td>
+</tr><tr data-f="F-009">
+  <th scope="row"><button type="button" class="fname" data-f="F-009">F-009</button></th>
+  <td class="fbody">法術への憧れの品</td>
+  <td class="f-set">一部1章（日常の小物・執筆時確定）</td>
+  <td class="f-mid none">—</td>
+  <td class="f-get">二部3章（戻る）→ 四部6章（家の錨）</td>
+  <td class="f-st">設計済み</td>
+</tr><tr data-f="F-010">
+  <th scope="row"><button type="button" class="fname" data-f="F-010">F-010</button></th>
+  <td class="fbody">側近の獣の強い一筆</td>
+  <td class="f-set">一部6章（撤退の混乱の中で目が合う）</td>
+  <td class="f-mid none">—</td>
+  <td class="f-get">四部3章（正体判明）→ 四部5章（立つ）</td>
+  <td class="f-st">設計済み</td>
+</tr><tr data-f="F-011">
+  <th scope="row"><button type="button" class="fname" data-f="F-011">F-011</button></th>
+  <td class="fbody">少年期の縁の場所（ハルベック近郊の山野）</td>
+  <td class="f-set">一部1章話6 または 2章【仮】</td>
+  <td class="f-mid">二部3章（故郷再訪・草を刈る男）</td>
+  <td class="f-get">四部4〜5章（庭＝決戦の舞台）</td>
+  <td class="f-st">吊り位置は第一部逆算で確定</td>
+</tr><tr data-f="F-012">
+  <th scope="row"><button type="button" class="fname" data-f="F-012">F-012</button></th>
+  <td class="fbody">死体場面の四つの指紋</td>
+  <td class="f-set">二部6章（告白の前）</td>
+  <td class="f-mid">四部2章（糸が揃う）</td>
+  <td class="f-get">四部3章（同じ場面が四枚におろされる）</td>
+  <td class="f-st">設計済み</td>
+</tr></tbody>
+      </table>
+    </div>
+    <div class="open">
+      <div class="panel">
+        <h3>開かれた謎（回収しない五つ）</h3>
+        <ul>
+          <li>災厄戦争の終わり方</li>
+          <li>災厄の人間時代</li>
+          <li>コトバは誰の言葉か</li>
+          <li>災厄に意思はあるか</li>
+          <li>次の凝りは始まっているか</li>
+        </ul>
+        <p class="note">撒き場所は童話（一部1章）・継承者史の化石（旅の先々）・四部6章の余白。災神のダミー線は神話の語としてだけ置き、伏線表に載せない。</p>
+      </div>
+      <div class="panel">
+        <h3>伏線表に未登録（章設計時に登録を提案）</h3>
+        <ul>
+          <li>c-003 の勧誘の影（一部4〜5章）→ 内通の進行（二部3章〜）→ 露見（三部6章）</li>
+          <li>継ぎ火の二度置き（二部1章 → 6章）</li>
+          <li>仕事師の指紋（三部1〜2章 → 6〜7章 → 四部3章）</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="sec" id="matrix">
+  <div class="wrap">
+    <h2>登場人物 × 部</h2>
+    <p class="lead">c-001〜c-020 の20人と N-01〜N-10・N-14〜N-17 の14人、計34人。各部の升は部内の章（左から1章→。三部だけ7つ）。塗りがあれば登場。N-14 は登場位置【未定】のため升は空。名前をクリックすると年表がその人物で絞られる。</p>
+    <div class="scroll">
+      <table class="matrix">
+        <thead><tr>
+          <th>人物</th>
+          <th class="pt">第一部<small>通し1〜6</small></th>
+          <th class="pt">第二部<small>通し7〜12</small></th>
+          <th class="pt">第三部<small>通し13〜19</small></th>
+          <th class="pt">第四部<small>通し20〜25</small></th>
+          <th>一行の役割 ／ 登場する部・章（背骨 §4）</th>
+        </tr></thead>
+        <tbody><tr data-char="c-001" class="t-main">
+  <th scope="row"><button type="button" class="mname" data-char="c-001"><span class="cid">c-001</span><span class="cname">テラベール</span></button><span class="tier">主人公</span></th>
+  <td class="mcell"><div class="strip"><span class="cell on first" title="一部1章（通し1）">初</span><span class="cell on" title="一部2章（通し2）"></span><span class="cell on" title="一部3章（通し3）"></span><span class="cell on" title="一部4章（通し4）"></span><span class="cell on" title="一部5章（通し5）"></span><span class="cell on" title="一部6章（通し6）"></span></div></td><td class="mcell"><div class="strip"><span class="cell on" title="二部1章（通し7）"></span><span class="cell on" title="二部2章（通し8）"></span><span class="cell on" title="二部3章（通し9）"></span><span class="cell on" title="二部4章（通し10）"></span><span class="cell on" title="二部5章（通し11）"></span><span class="cell on" title="二部6章（通し12）"></span></div></td><td class="mcell"><div class="strip"><span class="cell on" title="三部1章（通し13）"></span><span class="cell on" title="三部2章（通し14）"></span><span class="cell on" title="三部3章（通し15）"></span><span class="cell on" title="三部4章（通し16）"></span><span class="cell on" title="三部5章（通し17）"></span><span class="cell on" title="三部6章（通し18）"></span><span class="cell on" title="三部7章（通し19）"></span></div></td><td class="mcell"><div class="strip"><span class="cell on" title="四部1章（通し20）"></span><span class="cell on" title="四部2章（通し21）"></span><span class="cell on" title="四部3章（通し22）"></span><span class="cell on" title="四部4章（通し23）"></span><span class="cell on" title="四部5章（通し24）"></span><span class="cell on" title="四部6章（通し25）"></span></div></td>
+  <td class="mrole">主人公。視点固定<span class="mappear">一部1章〜四部6章（全章）</span></td>
+</tr><tr data-char="c-002" class="t-major">
+  <th scope="row"><button type="button" class="mname" data-char="c-002"><span class="cid">c-002</span><span class="cname">ガルド</span></button><span class="tier">主要人物</span></th>
+  <td class="mcell"><div class="strip"><span class="cell on first" title="一部1章（通し1） 話18">初</span><span class="cell on" title="一部2章（通し2） 本気の瞬間（青い瞳）を章の山に"></span><span class="cell on kari" title="一部3章（通し3） 稽古は続く。関わり方は仮 【仮】"></span><span class="cell on" title="一部4章（通し4） 剣に戻る一言"></span><span class="cell" title="一部5章（通し5）"></span><span class="cell on death" title="一部6章（通し6） 奥義と一手で大狼を討ち、灯を燃やし尽くして死ぬ。遺体も遺品も残らない">†</span></div></td><td class="mcell"><div class="strip"><span class="cell" title="二部1章（通し7）"></span><span class="cell" title="二部2章（通し8）"></span><span class="cell" title="二部3章（通し9）"></span><span class="cell" title="二部4章（通し10）"></span><span class="cell" title="二部5章（通し11）"></span><span class="cell" title="二部6章（通し12）"></span></div></td><td class="mcell"><div class="strip"><span class="cell" title="三部1章（通し13）"></span><span class="cell" title="三部2章（通し14）"></span><span class="cell" title="三部3章（通し15）"></span><span class="cell" title="三部4章（通し16）"></span><span class="cell" title="三部5章（通し17）"></span><span class="cell" title="三部6章（通し18）"></span><span class="cell" title="三部7章（通し19）"></span></div></td><td class="mcell"><div class="strip"><span class="cell" title="四部1章（通し20）"></span><span class="cell" title="四部2章（通し21）"></span><span class="cell" title="四部3章（通し22）"></span><span class="cell" title="四部4章（通し23）"></span><span class="cell" title="四部5章（通し24）"></span><span class="cell" title="四部6章（通し25）"></span></div></td>
+  <td class="mrole">剣の師。真の名を明かさず死ぬ<span class="mappear">一部1章 話18 初出／一部2〜6章 ／ 一部6章 死亡</span></td>
+</tr><tr data-char="c-003" class="t-major">
+  <th scope="row"><button type="button" class="mname" data-char="c-003"><span class="cid">c-003</span><span class="cname">友人【名未定】</span></button><span class="tier">主要人物</span></th>
+  <td class="mcell"><div class="strip"><span class="cell" title="一部1章（通し1）"></span><span class="cell" title="一部2章（通し2）"></span><span class="cell on first" title="一部3章（通し3） 約束の相手">初</span><span class="cell on kari" title="一部4章（通し4） 勧誘の影 【仮】"></span><span class="cell on kari" title="一部5章（通し5） 同行はどちらか 【仮】"></span><span class="cell on" title="一部6章（通し6） 気づきの立会人"></span></div></td><td class="mcell"><div class="strip"><span class="cell" title="二部1章（通し7）"></span><span class="cell" title="二部2章（通し8）"></span><span class="cell on kari" title="二部3章（通し9） 再合流・内通の始まり 【仮】"></span><span class="cell on" title="二部4章（通し10） 周辺"></span><span class="cell" title="二部5章（通し11）"></span><span class="cell on kari" title="二部6章（通し12） 居合わせ方 【仮】"></span></div></td><td class="mcell"><div class="strip"><span class="cell on" title="三部1章（通し13） そばで手伝う"></span><span class="cell on" title="三部2章（通し14）"></span><span class="cell on" title="三部3章（通し15）"></span><span class="cell on" title="三部4章（通し16）"></span><span class="cell on kari" title="三部5章（通し17） 戸口の顔出し（隊の日程を聞く） 【仮】"></span><span class="cell on" title="三部6章（通し18） 内通の露見"></span><span class="cell on exit kari" title="三部7章（通し19） 捕らわれ・口を開く。以後は捕らわれ 【仮】">退</span></div></td><td class="mcell"><div class="strip"><span class="cell" title="四部1章（通し20）"></span><span class="cell" title="四部2章（通し21）"></span><span class="cell" title="四部3章（通し22）"></span><span class="cell" title="四部4章（通し23）"></span><span class="cell" title="四部5章（通し24）"></span><span class="cell" title="四部6章（通し25）"></span></div></td>
+  <td class="mrole">約束の相手・気づきの立会人・内通者<span class="mappear">一部3〜6章／二部3章〜三部7章 ／ 三部6章 露見→7章 口を開く。以後は捕らわれ【仮】</span></td>
+</tr><tr data-char="c-004" class="t-major">
+  <th scope="row"><button type="button" class="mname" data-char="c-004"><span class="cid">c-004</span><span class="cname">エリーネ</span></button><span class="tier">主要人物</span></th>
+  <td class="mcell"><div class="strip"><span class="cell on first" title="一部1章（通し1） 前日譚">初</span><span class="cell" title="一部2章（通し2）"></span><span class="cell" title="一部3章（通し3）"></span><span class="cell" title="一部4章（通し4）"></span><span class="cell" title="一部5章（通し5）"></span><span class="cell" title="一部6章（通し6）"></span></div></td><td class="mcell"><div class="strip"><span class="cell" title="二部1章（通し7）"></span><span class="cell on" title="二部2章（通し8） 再登場"></span><span class="cell on" title="二部3章（通し9） 便り"></span><span class="cell on" title="二部4章（通し10） 交換の相手"></span><span class="cell" title="二部5章（通し11）"></span><span class="cell on" title="二部6章（通し12） 看病・独り言の告白"></span></div></td><td class="mcell"><div class="strip"><span class="cell on" title="三部1章（通し13） 付き合い始め"></span><span class="cell on" title="三部2章（通し14） 求婚の相手・結婚"></span><span class="cell on" title="三部3章（通し15） 拠点に残る"></span><span class="cell" title="三部4章（通し16）"></span><span class="cell on" title="三部5章（通し17） 帰宅の場面・先に言う"></span><span class="cell" title="三部6章（通し18）"></span><span class="cell on" title="三部7章（通し19） 帰還を迎える"></span></div></td><td class="mcell"><div class="strip"><span class="cell on" title="四部1章（通し20）"></span><span class="cell on" title="四部2章（通し21）"></span><span class="cell" title="四部3章（通し22）"></span><span class="cell" title="四部4章（通し23）"></span><span class="cell" title="四部5章（通し24）"></span><span class="cell on" title="四部6章（通し25）"></span></div></td>
+  <td class="mrole">ヒロイン・伴侶（テラの一歳上）<span class="mappear">一部1章 前日譚／二部2章〜四部6章</span></td>
+</tr><tr data-char="c-005" class="t-sub">
+  <th scope="row"><button type="button" class="mname" data-char="c-005"><span class="cid">c-005</span><span class="cname">ロルフ</span></button><span class="tier">サブ</span></th>
+  <td class="mcell"><div class="strip"><span class="cell on first exit" title="一部1章（通し1） 退去">退</span><span class="cell" title="一部2章（通し2）"></span><span class="cell" title="一部3章（通し3）"></span><span class="cell" title="一部4章（通し4）"></span><span class="cell" title="一部5章（通し5）"></span><span class="cell" title="一部6章（通し6）"></span></div></td><td class="mcell"><div class="strip"><span class="cell" title="二部1章（通し7）"></span><span class="cell" title="二部2章（通し8）"></span><span class="cell" title="二部3章（通し9）"></span><span class="cell" title="二部4章（通し10）"></span><span class="cell" title="二部5章（通し11）"></span><span class="cell" title="二部6章（通し12）"></span></div></td><td class="mcell"><div class="strip"><span class="cell" title="三部1章（通し13）"></span><span class="cell" title="三部2章（通し14）"></span><span class="cell" title="三部3章（通し15）"></span><span class="cell" title="三部4章（通し16）"></span><span class="cell" title="三部5章（通し17）"></span><span class="cell" title="三部6章（通し18）"></span><span class="cell" title="三部7章（通し19）"></span></div></td><td class="mcell"><div class="strip"><span class="cell" title="四部1章（通し20）"></span><span class="cell" title="四部2章（通し21）"></span><span class="cell" title="四部3章（通し22）"></span><span class="cell" title="四部4章（通し23）"></span><span class="cell" title="四部5章（通し24）"></span><span class="cell on kari" title="四部6章（通し25） 戦後の再会 【仮】"></span></div></td>
+  <td class="mrole">院の最年長。崩壊を生き延びて退去<span class="mappear">一部1章 ／ 四部6章 再会【仮】</span></td>
+</tr><tr data-char="c-006" class="t-sub">
+  <th scope="row"><button type="button" class="mname" data-char="c-006"><span class="cid">c-006</span><span class="cname">ニコ</span></button><span class="tier">サブ</span></th>
+  <td class="mcell"><div class="strip"><span class="cell on first exit" title="一部1章（通し1） 退去">退</span><span class="cell" title="一部2章（通し2）"></span><span class="cell" title="一部3章（通し3）"></span><span class="cell" title="一部4章（通し4）"></span><span class="cell" title="一部5章（通し5）"></span><span class="cell" title="一部6章（通し6）"></span></div></td><td class="mcell"><div class="strip"><span class="cell" title="二部1章（通し7）"></span><span class="cell" title="二部2章（通し8）"></span><span class="cell" title="二部3章（通し9）"></span><span class="cell" title="二部4章（通し10）"></span><span class="cell" title="二部5章（通し11）"></span><span class="cell" title="二部6章（通し12）"></span></div></td><td class="mcell"><div class="strip"><span class="cell" title="三部1章（通し13）"></span><span class="cell" title="三部2章（通し14）"></span><span class="cell" title="三部3章（通し15）"></span><span class="cell" title="三部4章（通し16）"></span><span class="cell" title="三部5章（通し17）"></span><span class="cell" title="三部6章（通し18）"></span><span class="cell" title="三部7章（通し19）"></span></div></td><td class="mcell"><div class="strip"><span class="cell" title="四部1章（通し20）"></span><span class="cell" title="四部2章（通し21）"></span><span class="cell" title="四部3章（通し22）"></span><span class="cell" title="四部4章（通し23）"></span><span class="cell" title="四部5章（通し24）"></span><span class="cell on kari" title="四部6章（通し25） 戦後の再会 【仮】"></span></div></td>
+  <td class="mrole">同い年の騒がしさ担当。退去<span class="mappear">一部1章 ／ 四部6章 再会【仮】</span></td>
+</tr><tr data-char="c-007" class="t-sub">
+  <th scope="row"><button type="button" class="mname" data-char="c-007"><span class="cid">c-007</span><span class="cname">ネル</span></button><span class="tier">サブ</span></th>
+  <td class="mcell"><div class="strip"><span class="cell on first death" title="一部1章（通し1）">†</span><span class="cell" title="一部2章（通し2）"></span><span class="cell" title="一部3章（通し3）"></span><span class="cell" title="一部4章（通し4）"></span><span class="cell" title="一部5章（通し5）"></span><span class="cell" title="一部6章（通し6）"></span></div></td><td class="mcell"><div class="strip"><span class="cell" title="二部1章（通し7）"></span><span class="cell" title="二部2章（通し8）"></span><span class="cell" title="二部3章（通し9）"></span><span class="cell" title="二部4章（通し10）"></span><span class="cell" title="二部5章（通し11）"></span><span class="cell" title="二部6章（通し12）"></span></div></td><td class="mcell"><div class="strip"><span class="cell" title="三部1章（通し13）"></span><span class="cell" title="三部2章（通し14）"></span><span class="cell" title="三部3章（通し15）"></span><span class="cell" title="三部4章（通し16）"></span><span class="cell" title="三部5章（通し17）"></span><span class="cell" title="三部6章（通し18）"></span><span class="cell" title="三部7章（通し19）"></span></div></td><td class="mcell"><div class="strip"><span class="cell" title="四部1章（通し20）"></span><span class="cell" title="四部2章（通し21）"></span><span class="cell" title="四部3章（通し22）"></span><span class="cell" title="四部4章（通し23）"></span><span class="cell" title="四部5章（通し24）"></span><span class="cell" title="四部6章（通し25）"></span></div></td>
+  <td class="mrole">院の末っ子。テラが最初に数える名前<span class="mappear">一部1章 ／ 一部1章 死亡</span></td>
+</tr><tr data-char="c-008" class="t-key">
+  <th scope="row"><button type="button" class="mname" data-char="c-008"><span class="cid">c-008</span><span class="cname">ヴァルデン</span></button><span class="tier">キーパーソン</span></th>
+  <td class="mcell"><div class="strip"><span class="cell on first death" title="一部1章（通し1） 話16 視点回">†</span><span class="cell" title="一部2章（通し2）"></span><span class="cell" title="一部3章（通し3）"></span><span class="cell" title="一部4章（通し4）"></span><span class="cell" title="一部5章（通し5）"></span><span class="cell" title="一部6章（通し6）"></span></div></td><td class="mcell"><div class="strip"><span class="cell" title="二部1章（通し7）"></span><span class="cell" title="二部2章（通し8）"></span><span class="cell" title="二部3章（通し9）"></span><span class="cell" title="二部4章（通し10）"></span><span class="cell" title="二部5章（通し11）"></span><span class="cell" title="二部6章（通し12）"></span></div></td><td class="mcell"><div class="strip"><span class="cell" title="三部1章（通し13）"></span><span class="cell" title="三部2章（通し14）"></span><span class="cell" title="三部3章（通し15）"></span><span class="cell" title="三部4章（通し16）"></span><span class="cell" title="三部5章（通し17）"></span><span class="cell" title="三部6章（通し18）"></span><span class="cell" title="三部7章（通し19）"></span></div></td><td class="mcell"><div class="strip"><span class="cell" title="四部1章（通し20）"></span><span class="cell" title="四部2章（通し21）"></span><span class="cell" title="四部3章（通し22）"></span><span class="cell" title="四部4章（通し23）"></span><span class="cell" title="四部5章（通し24）"></span><span class="cell" title="四部6章（通し25）"></span></div></td>
+  <td class="mrole">老領主。守る人の原像<span class="mappear">一部1章（話16 視点回） ／ 一部1章 死亡</span></td>
+</tr><tr data-char="c-009" class="t-key">
+  <th scope="row"><button type="button" class="mname" data-char="c-009"><span class="cid">c-009</span><span class="cname">セップ</span></button><span class="tier">キーパーソン</span></th>
+  <td class="mcell"><div class="strip"><span class="cell on first" title="一部1章（通し1）">初</span><span class="cell" title="一部2章（通し2）"></span><span class="cell" title="一部3章（通し3）"></span><span class="cell" title="一部4章（通し4）"></span><span class="cell" title="一部5章（通し5）"></span><span class="cell" title="一部6章（通し6）"></span></div></td><td class="mcell"><div class="strip"><span class="cell" title="二部1章（通し7）"></span><span class="cell" title="二部2章（通し8）"></span><span class="cell on kari" title="二部3章（通し9） 証言 【仮】"></span><span class="cell" title="二部4章（通し10）"></span><span class="cell" title="二部5章（通し11）"></span><span class="cell" title="二部6章（通し12）"></span></div></td><td class="mcell"><div class="strip"><span class="cell" title="三部1章（通し13）"></span><span class="cell" title="三部2章（通し14）"></span><span class="cell" title="三部3章（通し15）"></span><span class="cell" title="三部4章（通し16）"></span><span class="cell" title="三部5章（通し17）"></span><span class="cell" title="三部6章（通し18）"></span><span class="cell" title="三部7章（通し19）"></span></div></td><td class="mcell"><div class="strip"><span class="cell" title="四部1章（通し20）"></span><span class="cell" title="四部2章（通し21）"></span><span class="cell" title="四部3章（通し22）"></span><span class="cell" title="四部4章（通し23）"></span><span class="cell" title="四部5章（通し24）"></span><span class="cell" title="四部6章（通し25）"></span></div></td>
+  <td class="mrole">点灯夫。F-002 表層の証人<span class="mappear">一部1章／二部3章（証言）【仮】</span></td>
+</tr><tr data-char="c-010" class="t-sub">
+  <th scope="row"><button type="button" class="mname" data-char="c-010"><span class="cid">c-010</span><span class="cname">ホルツ</span></button><span class="tier">サブ</span></th>
+  <td class="mcell"><div class="strip"><span class="cell on first" title="一部1章（通し1）">初</span><span class="cell" title="一部2章（通し2）"></span><span class="cell" title="一部3章（通し3）"></span><span class="cell" title="一部4章（通し4）"></span><span class="cell" title="一部5章（通し5）"></span><span class="cell" title="一部6章（通し6）"></span></div></td><td class="mcell"><div class="strip"><span class="cell" title="二部1章（通し7）"></span><span class="cell" title="二部2章（通し8）"></span><span class="cell" title="二部3章（通し9）"></span><span class="cell" title="二部4章（通し10）"></span><span class="cell" title="二部5章（通し11）"></span><span class="cell" title="二部6章（通し12）"></span></div></td><td class="mcell"><div class="strip"><span class="cell" title="三部1章（通し13）"></span><span class="cell" title="三部2章（通し14）"></span><span class="cell" title="三部3章（通し15）"></span><span class="cell" title="三部4章（通し16）"></span><span class="cell" title="三部5章（通し17）"></span><span class="cell" title="三部6章（通し18）"></span><span class="cell" title="三部7章（通し19）"></span></div></td><td class="mcell"><div class="strip"><span class="cell" title="四部1章（通し20）"></span><span class="cell" title="四部2章（通し21）"></span><span class="cell" title="四部3章（通し22）"></span><span class="cell" title="四部4章（通し23）"></span><span class="cell" title="四部5章（通し24）"></span><span class="cell" title="四部6章（通し25）"></span></div></td>
+  <td class="mrole">倉の主。テラを安く数える大人<span class="mappear">一部1章</span></td>
+</tr><tr data-char="c-011" class="t-key">
+  <th scope="row"><button type="button" class="mname" data-char="c-011"><span class="cid">c-011</span><span class="cname">ヨナス（法術師）</span></button><span class="tier">キーパーソン</span></th>
+  <td class="mcell"><div class="strip"><span class="cell on first exit" title="一部1章（通し1） 披露と設置のみ。以後は行方不明">退</span><span class="cell" title="一部2章（通し2）"></span><span class="cell" title="一部3章（通し3）"></span><span class="cell" title="一部4章（通し4）"></span><span class="cell" title="一部5章（通し5）"></span><span class="cell" title="一部6章（通し6）"></span></div></td><td class="mcell"><div class="strip"><span class="cell" title="二部1章（通し7）"></span><span class="cell" title="二部2章（通し8）"></span><span class="cell" title="二部3章（通し9）"></span><span class="cell" title="二部4章（通し10）"></span><span class="cell" title="二部5章（通し11）"></span><span class="cell on death" title="二部6章（通し12） 死体">†</span></div></td><td class="mcell"><div class="strip"><span class="cell" title="三部1章（通し13）"></span><span class="cell" title="三部2章（通し14）"></span><span class="cell" title="三部3章（通し15）"></span><span class="cell" title="三部4章（通し16）"></span><span class="cell" title="三部5章（通し17）"></span><span class="cell" title="三部6章（通し18）"></span><span class="cell" title="三部7章（通し19）"></span></div></td><td class="mcell"><div class="strip"><span class="cell" title="四部1章（通し20）"></span><span class="cell" title="四部2章（通し21）"></span><span class="cell" title="四部3章（通し22）"></span><span class="cell" title="四部4章（通し23）"></span><span class="cell" title="四部5章（通し24）"></span><span class="cell" title="四部6章（通し25）"></span></div></td>
+  <td class="mrole">第一部の敵。崩壊の火種<span class="mappear">一部1章（披露）。以後は噂と指紋 ／ 第一部内で行方不明→二部6章 死体</span></td>
+</tr><tr data-char="c-012" class="t-key">
+  <th scope="row"><button type="button" class="mname" data-char="c-012"><span class="cid">c-012</span><span class="cname">オスカ（側近・恩義）</span></button><span class="tier">キーパーソン</span></th>
+  <td class="mcell"><div class="strip"><span class="cell on first" title="一部1章（通し1） 随行者">初</span><span class="cell" title="一部2章（通し2）"></span><span class="cell" title="一部3章（通し3）"></span><span class="cell" title="一部4章（通し4）"></span><span class="cell" title="一部5章（通し5）"></span><span class="cell" title="一部6章（通し6）"></span></div></td><td class="mcell"><div class="strip"><span class="cell" title="二部1章（通し7）"></span><span class="cell" title="二部2章（通し8）"></span><span class="cell" title="二部3章（通し9）"></span><span class="cell" title="二部4章（通し10）"></span><span class="cell" title="二部5章（通し11）"></span><span class="cell on first" title="二部6章（通し12） 案内人・看取る目（本格初出）">初</span></div></td><td class="mcell"><div class="strip"><span class="cell" title="三部1章（通し13）"></span><span class="cell" title="三部2章（通し14）"></span><span class="cell" title="三部3章（通し15）"></span><span class="cell" title="三部4章（通し16）"></span><span class="cell" title="三部5章（通し17）"></span><span class="cell" title="三部6章（通し18）"></span><span class="cell" title="三部7章（通し19）"></span></div></td><td class="mcell"><div class="strip"><span class="cell" title="四部1章（通し20）"></span><span class="cell" title="四部2章（通し21）"></span><span class="cell" title="四部3章（通し22）"></span><span class="cell on" title="四部4章（通し23） 最後の証言"></span><span class="cell" title="四部5章（通し24）"></span><span class="cell" title="四部6章（通し25）"></span></div></td>
+  <td class="mrole">死体場面の案内人・看取る目。F-002 裏層の最後のピースの運び手【確定方向】<span class="mappear">一部1章（随行者）／二部6章／四部4章（最後の証言）</span></td>
+</tr><tr data-char="c-013" class="t-key">
+  <th scope="row"><button type="button" class="mname" data-char="c-013"><span class="cid">c-013</span><span class="cname">リヴェル（側近・学徒）</span></button><span class="tier">キーパーソン</span></th>
+  <td class="mcell"><div class="strip"><span class="cell on first" title="一部1章（通し1） 随行者">初</span><span class="cell" title="一部2章（通し2）"></span><span class="cell" title="一部3章（通し3）"></span><span class="cell" title="一部4章（通し4）"></span><span class="cell" title="一部5章（通し5）"></span><span class="cell" title="一部6章（通し6）"></span></div></td><td class="mcell"><div class="strip"><span class="cell" title="二部1章（通し7）"></span><span class="cell" title="二部2章（通し8）"></span><span class="cell" title="二部3章（通し9）"></span><span class="cell" title="二部4章（通し10）"></span><span class="cell" title="二部5章（通し11）"></span><span class="cell" title="二部6章（通し12）"></span></div></td><td class="mcell"><div class="strip"><span class="cell" title="三部1章（通し13）"></span><span class="cell" title="三部2章（通し14）"></span><span class="cell" title="三部3章（通し15）"></span><span class="cell" title="三部4章（通し16）"></span><span class="cell" title="三部5章（通し17）"></span><span class="cell" title="三部6章（通し18）"></span><span class="cell" title="三部7章（通し19）"></span></div></td><td class="mcell"><div class="strip"><span class="cell" title="四部1章（通し20）"></span><span class="cell" title="四部2章（通し21）"></span><span class="cell on" title="四部3章（通し22） 顔が割れる"></span><span class="cell" title="四部4章（通し23）"></span><span class="cell" title="四部5章（通し24）"></span><span class="cell" title="四部6章（通し25）"></span></div></td>
+  <td class="mrole">組織の監視の顔<span class="mappear">一部1章（随行者）／四部3章（顔が割れる） ／ 【仮】</span></td>
+</tr><tr data-char="c-014" class="t-major">
+  <th scope="row"><button type="button" class="mname" data-char="c-014"><span class="cid">c-014</span><span class="cname">庭師【名未定】</span></button><span class="tier">主要人物</span></th>
+  <td class="mcell"><div class="strip"><span class="cell" title="一部1章（通し1）"></span><span class="cell" title="一部2章（通し2）"></span><span class="cell" title="一部3章（通し3）"></span><span class="cell" title="一部4章（通し4）"></span><span class="cell" title="一部5章（通し5）"></span><span class="cell" title="一部6章（通し6）"></span></div></td><td class="mcell"><div class="strip"><span class="cell" title="二部1章（通し7）"></span><span class="cell" title="二部2章（通し8）"></span><span class="cell on first" title="二部3章（通し9） 草を刈る名もない男">初</span><span class="cell" title="二部4章（通し10）"></span><span class="cell" title="二部5章（通し11）"></span><span class="cell" title="二部6章（通し12）"></span></div></td><td class="mcell"><div class="strip"><span class="cell" title="三部1章（通し13）"></span><span class="cell" title="三部2章（通し14）"></span><span class="cell" title="三部3章（通し15）"></span><span class="cell" title="三部4章（通し16）"></span><span class="cell" title="三部5章（通し17）"></span><span class="cell" title="三部6章（通し18）"></span><span class="cell" title="三部7章（通し19）"></span></div></td><td class="mcell"><div class="strip"><span class="cell" title="四部1章（通し20）"></span><span class="cell" title="四部2章（通し21）"></span><span class="cell" title="四部3章（通し22）"></span><span class="cell on death" title="四部4章（通し23） 最期＝収穫">†</span><span class="cell" title="四部5章（通し24）"></span><span class="cell" title="四部6章（通し25）"></span></div></td>
+  <td class="mrole">裏のボス・元継承者（約三百歳級）<span class="mappear">二部3章（草を刈る男）／四部4章 ／ 四部4章末 最期</span></td>
+</tr><tr data-char="c-015" class="t-key">
+  <th scope="row"><button type="button" class="mname" data-char="c-015"><span class="cid">c-015</span><span class="cname">皆救い【名未定】</span></button><span class="tier">キーパーソン</span></th>
+  <td class="mcell"><div class="strip"><span class="cell" title="一部1章（通し1）"></span><span class="cell" title="一部2章（通し2）"></span><span class="cell" title="一部3章（通し3）"></span><span class="cell" title="一部4章（通し4）"></span><span class="cell" title="一部5章（通し5）"></span><span class="cell" title="一部6章（通し6）"></span></div></td><td class="mcell"><div class="strip"><span class="cell" title="二部1章（通し7）"></span><span class="cell" title="二部2章（通し8）"></span><span class="cell on first" title="二部3章（通し9） 下っ端の顔">初</span><span class="cell" title="二部4章（通し10）"></span><span class="cell" title="二部5章（通し11）"></span><span class="cell" title="二部6章（通し12）"></span></div></td><td class="mcell"><div class="strip"><span class="cell" title="三部1章（通し13）"></span><span class="cell" title="三部2章（通し14）"></span><span class="cell" title="三部3章（通し15）"></span><span class="cell" title="三部4章（通し16）"></span><span class="cell" title="三部5章（通し17）"></span><span class="cell" title="三部6章（通し18）"></span><span class="cell" title="三部7章（通し19）"></span></div></td><td class="mcell"><div class="strip"><span class="cell" title="四部1章（通し20）"></span><span class="cell" title="四部2章（通し21）"></span><span class="cell on" title="四部3章（通し22） 正体判明"></span><span class="cell" title="四部4章（通し23）"></span><span class="cell" title="四部5章（通し24）"></span><span class="cell" title="四部6章（通し25）"></span></div></td>
+  <td class="mrole">幹部A。孤児院の下っ端<span class="mappear">二部3章／四部3章 ／ 【仮】</span></td>
+</tr><tr data-char="c-016" class="t-key">
+  <th scope="row"><button type="button" class="mname" data-char="c-016"><span class="cid">c-016</span><span class="cname">時止まりの王【名未定】</span></button><span class="tier">キーパーソン</span></th>
+  <td class="mcell"><div class="strip"><span class="cell" title="一部1章（通し1）"></span><span class="cell" title="一部2章（通し2）"></span><span class="cell" title="一部3章（通し3）"></span><span class="cell" title="一部4章（通し4）"></span><span class="cell" title="一部5章（通し5）"></span><span class="cell" title="一部6章（通し6）"></span></div></td><td class="mcell"><div class="strip"><span class="cell" title="二部1章（通し7）"></span><span class="cell" title="二部2章（通し8）"></span><span class="cell" title="二部3章（通し9）"></span><span class="cell" title="二部4章（通し10）"></span><span class="cell" title="二部5章（通し11）"></span><span class="cell" title="二部6章（通し12）"></span></div></td><td class="mcell"><div class="strip"><span class="cell" title="三部1章（通し13）"></span><span class="cell" title="三部2章（通し14）"></span><span class="cell" title="三部3章（通し15）"></span><span class="cell" title="三部4章（通し16）"></span><span class="cell" title="三部5章（通し17）"></span><span class="cell" title="三部6章（通し18）"></span><span class="cell" title="三部7章（通し19）"></span></div></td><td class="mcell"><div class="strip"><span class="cell" title="四部1章（通し20）"></span><span class="cell on first" title="四部2章（通し21） 議会での接点">初</span><span class="cell on" title="四部3章（通し22） 正体判明"></span><span class="cell" title="四部4章（通し23）"></span><span class="cell" title="四部5章（通し24）"></span><span class="cell" title="四部6章（通し25）"></span></div></td>
+  <td class="mrole">幹部B。列強国の王<span class="mappear">四部2章（議会）／四部3章 ／ 【仮】</span></td>
+</tr><tr data-char="c-017" class="t-key">
+  <th scope="row"><button type="button" class="mname" data-char="c-017"><span class="cid">c-017</span><span class="cname">育ての親【名未定】</span></button><span class="tier">キーパーソン</span></th>
+  <td class="mcell"><div class="strip"><span class="cell" title="一部1章（通し1）"></span><span class="cell" title="一部2章（通し2）"></span><span class="cell" title="一部3章（通し3）"></span><span class="cell on first kari" title="一部4章（通し4） 表の顔＝法具工房の職人（副次） 【仮】">初</span><span class="cell" title="一部5章（通し5）"></span><span class="cell" title="一部6章（通し6）"></span></div></td><td class="mcell"><div class="strip"><span class="cell" title="二部1章（通し7）"></span><span class="cell" title="二部2章（通し8）"></span><span class="cell" title="二部3章（通し9）"></span><span class="cell" title="二部4章（通し10）"></span><span class="cell" title="二部5章（通し11）"></span><span class="cell" title="二部6章（通し12）"></span></div></td><td class="mcell"><div class="strip"><span class="cell" title="三部1章（通し13）"></span><span class="cell" title="三部2章（通し14）"></span><span class="cell" title="三部3章（通し15）"></span><span class="cell" title="三部4章（通し16）"></span><span class="cell" title="三部5章（通し17）"></span><span class="cell" title="三部6章（通し18）"></span><span class="cell" title="三部7章（通し19）"></span></div></td><td class="mcell"><div class="strip"><span class="cell" title="四部1章（通し20）"></span><span class="cell" title="四部2章（通し21）"></span><span class="cell on" title="四部3章（通し22） 正体判明"></span><span class="cell on kari" title="四部4章（通し23） 庭にいる 【仮】"></span><span class="cell" title="四部5章（通し24）"></span><span class="cell" title="四部6章（通し25）"></span></div></td>
+  <td class="mrole">幹部D。法具工房の職人<span class="mappear">一部4章（学習経路の副次）【仮】／四部3〜4章 ／ 【仮】</span></td>
+</tr><tr data-char="c-018" class="t-major">
+  <th scope="row"><button type="button" class="mname" data-char="c-018"><span class="cid">c-018</span><span class="cname">戦友【名未定】</span></button><span class="tier">主要人物</span></th>
+  <td class="mcell"><div class="strip"><span class="cell" title="一部1章（通し1）"></span><span class="cell" title="一部2章（通し2）"></span><span class="cell on first" title="一部3章（通し3） 少年兵仲間">初</span><span class="cell" title="一部4章（通し4）"></span><span class="cell on kari" title="一部5章（通し5） 同行はどちらか 【仮】"></span><span class="cell on" title="一部6章（通し6）"></span></div></td><td class="mcell"><div class="strip"><span class="cell" title="二部1章（通し7）"></span><span class="cell" title="二部2章（通し8）"></span><span class="cell" title="二部3章（通し9）"></span><span class="cell" title="二部4章（通し10）"></span><span class="cell" title="二部5章（通し11）"></span><span class="cell" title="二部6章（通し12）"></span></div></td><td class="mcell"><div class="strip"><span class="cell" title="三部1章（通し13）"></span><span class="cell" title="三部2章（通し14）"></span><span class="cell" title="三部3章（通し15）"></span><span class="cell on" title="三部4章（通し16） 再登場・戦友に"></span><span class="cell" title="三部5章（通し17）"></span><span class="cell on death" title="三部6章（通し18）">†</span><span class="cell" title="三部7章（通し19）"></span></div></td><td class="mcell"><div class="strip"><span class="cell" title="四部1章（通し20）"></span><span class="cell" title="四部2章（通し21）"></span><span class="cell" title="四部3章（通し22）"></span><span class="cell" title="四部4章（通し23）"></span><span class="cell" title="四部5章（通し24）"></span><span class="cell" title="四部6章（通し25）"></span></div></td>
+  <td class="mrole">少年兵仲間→三部の戦友<span class="mappear">一部3章／三部4〜6章 ／ 三部6章 死亡</span></td>
+</tr><tr data-char="c-019" class="t-major">
+  <th scope="row"><button type="button" class="mname" data-char="c-019"><span class="cid">c-019</span><span class="cname">継ぎ火の同僚【名未定】</span></button><span class="tier">主要人物</span></th>
+  <td class="mcell"><div class="strip"><span class="cell" title="一部1章（通し1）"></span><span class="cell" title="一部2章（通し2）"></span><span class="cell" title="一部3章（通し3）"></span><span class="cell" title="一部4章（通し4）"></span><span class="cell" title="一部5章（通し5）"></span><span class="cell" title="一部6章（通し6）"></span></div></td><td class="mcell"><div class="strip"><span class="cell on first" title="二部1章（通し7） 継ぎ火の教えの一度目">初</span><span class="cell on kari" title="二部2章（通し8） 同隊 【仮】"></span><span class="cell" title="二部3章（通し9）"></span><span class="cell on" title="二部4章（通し10） 周辺"></span><span class="cell on" title="二部5章（通し11）"></span><span class="cell on" title="二部6章（通し12） 継ぎ火の二度目"></span></div></td><td class="mcell"><div class="strip"><span class="cell on" title="三部1章（通し13）"></span><span class="cell on" title="三部2章（通し14）"></span><span class="cell on" title="三部3章（通し15）"></span><span class="cell on" title="三部4章（通し16）"></span><span class="cell on" title="三部5章（通し17）"></span><span class="cell on" title="三部6章（通し18）"></span><span class="cell on" title="三部7章（通し19）"></span></div></td><td class="mcell"><div class="strip"><span class="cell on" title="四部1章（通し20）"></span><span class="cell" title="四部2章（通し21）"></span><span class="cell on" title="四部3章（通し22）"></span><span class="cell on" title="四部4章（通し23）"></span><span class="cell on" title="四部5章（通し24） 止め手"></span><span class="cell on" title="四部6章（通し25）"></span></div></td>
+  <td class="mrole">継ぎ火の教えの運び手・止め手<span class="mappear">二部1章〜四部6章</span></td>
+</tr><tr data-char="c-020" class="t-key">
+  <th scope="row"><button type="button" class="mname" data-char="c-020"><span class="cid">c-020</span><span class="cname">継承者【名未定】</span></button><span class="tier">キーパーソン</span></th>
+  <td class="mcell"><div class="strip"><span class="cell" title="一部1章（通し1）"></span><span class="cell" title="一部2章（通し2）"></span><span class="cell" title="一部3章（通し3）"></span><span class="cell" title="一部4章（通し4）"></span><span class="cell" title="一部5章（通し5）"></span><span class="cell" title="一部6章（通し6）"></span></div></td><td class="mcell"><div class="strip"><span class="cell" title="二部1章（通し7）"></span><span class="cell" title="二部2章（通し8）"></span><span class="cell" title="二部3章（通し9）"></span><span class="cell" title="二部4章（通し10）"></span><span class="cell" title="二部5章（通し11）"></span><span class="cell" title="二部6章（通し12）"></span></div></td><td class="mcell"><div class="strip"><span class="cell" title="三部1章（通し13）"></span><span class="cell" title="三部2章（通し14）"></span><span class="cell" title="三部3章（通し15）"></span><span class="cell" title="三部4章（通し16）"></span><span class="cell" title="三部5章（通し17）"></span><span class="cell" title="三部6章（通し18）"></span><span class="cell" title="三部7章（通し19）"></span></div></td><td class="mcell"><div class="strip"><span class="cell on first" title="四部1章（通し20） 正式継承を授ける">初</span><span class="cell" title="四部2章（通し21）"></span><span class="cell" title="四部3章（通し22）"></span><span class="cell" title="四部4章（通し23）"></span><span class="cell" title="四部5章（通し24）"></span><span class="cell" title="四部6章（通し25）"></span></div></td>
+  <td class="mrole">厄滅継天流の別系（ガルドの一世代上）。正式継承を授ける<span class="mappear">四部1〜2章 ／ 以後は【仮】（決戦に出るか）</span></td>
+</tr><tr data-char="N-01" class="t-new">
+  <th scope="row"><button type="button" class="mname" data-char="N-01"><span class="cid">N-01</span><span class="cname">兄姉（兄と姉・二人一組）</span></button><span class="tier">新規 N</span></th>
+  <td class="mcell"><div class="strip"><span class="cell" title="一部1章（通し1）"></span><span class="cell" title="一部2章（通し2）"></span><span class="cell" title="一部3章（通し3）"></span><span class="cell" title="一部4章（通し4）"></span><span class="cell on first" title="一部5章（通し5） 命日の習慣">初</span><span class="cell" title="一部6章（通し6）"></span></div></td><td class="mcell"><div class="strip"><span class="cell" title="二部1章（通し7）"></span><span class="cell" title="二部2章（通し8）"></span><span class="cell" title="二部3章（通し9）"></span><span class="cell" title="二部4章（通し10）"></span><span class="cell" title="二部5章（通し11）"></span><span class="cell" title="二部6章（通し12）"></span></div></td><td class="mcell"><div class="strip"><span class="cell" title="三部1章（通し13）"></span><span class="cell on kari" title="三部2章（通し14） 式に来る 【仮】"></span><span class="cell" title="三部3章（通し15）"></span><span class="cell" title="三部4章（通し16）"></span><span class="cell" title="三部5章（通し17）"></span><span class="cell" title="三部6章（通し18）"></span><span class="cell" title="三部7章（通し19）"></span></div></td><td class="mcell"><div class="strip"><span class="cell" title="四部1章（通し20）"></span><span class="cell" title="四部2章（通し21）"></span><span class="cell" title="四部3章（通し22）"></span><span class="cell" title="四部4章（通し23）"></span><span class="cell" title="四部5章（通し24）"></span><span class="cell on kari" title="四部6章（通し25） 【仮】"></span></div></td>
+  <td class="mrole">「悼まれていた」を死の報の形で渡す（階層の目安: キーパーソン）<span class="mappear">一部5章／三部2章 式【仮】／四部6章【仮】</span></td>
+</tr><tr data-char="N-02" class="t-new">
+  <th scope="row"><button type="button" class="mname" data-char="N-02"><span class="cid">N-02</span><span class="cname">討魔院の長（正論の人）</span></button><span class="tier">新規 N</span></th>
+  <td class="mcell"><div class="strip"><span class="cell" title="一部1章（通し1）"></span><span class="cell" title="一部2章（通し2）"></span><span class="cell" title="一部3章（通し3）"></span><span class="cell" title="一部4章（通し4）"></span><span class="cell" title="一部5章（通し5）"></span><span class="cell" title="一部6章（通し6）"></span></div></td><td class="mcell"><div class="strip"><span class="cell on first" title="二部1章（通し7） 背景">初</span><span class="cell" title="二部2章（通し8）"></span><span class="cell" title="二部3章（通し9）"></span><span class="cell" title="二部4章（通し10）"></span><span class="cell on" title="二部5章（通し11） 正面衝突"></span><span class="cell" title="二部6章（通し12）"></span></div></td><td class="mcell"><div class="strip"><span class="cell" title="三部1章（通し13）"></span><span class="cell" title="三部2章（通し14）"></span><span class="cell on" title="三部3章（通し15） 召集"></span><span class="cell" title="三部4章（通し16）"></span><span class="cell" title="三部5章（通し17）"></span><span class="cell" title="三部6章（通し18）"></span><span class="cell on" title="三部7章（通し19）"></span></div></td><td class="mcell"><div class="strip"><span class="cell" title="四部1章（通し20）"></span><span class="cell on" title="四部2章（通し21） 制度の線"></span><span class="cell on" title="四部3章（通し22）"></span><span class="cell" title="四部4章（通し23）"></span><span class="cell" title="四部5章（通し24）"></span><span class="cell" title="四部6章（通し25）"></span></div></td>
+  <td class="mrole">全体を守る正しさで個を斬る。解決しない衝突の相手（主要人物）<span class="mappear">二部1章（背景）／二部5章／三部3章／三部7章／四部2〜3章</span></td>
+</tr><tr data-char="N-03" class="t-new">
+  <th scope="row"><button type="button" class="mname" data-char="N-03"><span class="cid">N-03</span><span class="cname">討魔院の仲間（終盤まで共にする）</span></button><span class="tier">新規 N</span></th>
+  <td class="mcell"><div class="strip"><span class="cell" title="一部1章（通し1）"></span><span class="cell" title="一部2章（通し2）"></span><span class="cell" title="一部3章（通し3）"></span><span class="cell" title="一部4章（通し4）"></span><span class="cell" title="一部5章（通し5）"></span><span class="cell" title="一部6章（通し6）"></span></div></td><td class="mcell"><div class="strip"><span class="cell on first kari" title="二部1章（通し7） 同じ隊 【仮】">初</span><span class="cell on kari" title="二部2章（通し8） 同隊 【仮】"></span><span class="cell" title="二部3章（通し9）"></span><span class="cell" title="二部4章（通し10）"></span><span class="cell on kari" title="二部5章（通し11） 同じ夜の隊 【仮】"></span><span class="cell on" title="二部6章（通し12）"></span></div></td><td class="mcell"><div class="strip"><span class="cell on" title="三部1章（通し13） 瀕死の同僚【仮】"></span><span class="cell on" title="三部2章（通し14）"></span><span class="cell on" title="三部3章（通し15）"></span><span class="cell on" title="三部4章（通し16）"></span><span class="cell on" title="三部5章（通し17）"></span><span class="cell on" title="三部6章（通し18） もう一人の容疑者（ミスリード）"></span><span class="cell on" title="三部7章（通し19） 疑いが晴れる"></span></div></td><td class="mcell"><div class="strip"><span class="cell on" title="四部1章（通し20）"></span><span class="cell" title="四部2章（通し21）"></span><span class="cell on" title="四部3章（通し22）"></span><span class="cell on" title="四部4章（通し23）"></span><span class="cell on" title="四部5章（通し24） 止め手"></span><span class="cell on" title="四部6章（通し25）"></span></div></td>
+  <td class="mrole">疑われても隣に立ち続ける。c-003 の裏返し。もう一人の容疑者（三部6章）・止め手（四部5章）【確定方向】（主要人物）<span class="mappear">二部1章〜四部6章。三部6章で容疑者【確定方向】</span></td>
+</tr><tr data-char="N-04" class="t-new">
+  <th scope="row"><button type="button" class="mname" data-char="N-04"><span class="cid">N-04</span><span class="cname">次世代の少年兵（継承の相手）</span></button><span class="tier">新規 N</span></th>
+  <td class="mcell"><div class="strip"><span class="cell" title="一部1章（通し1）"></span><span class="cell" title="一部2章（通し2）"></span><span class="cell" title="一部3章（通し3）"></span><span class="cell" title="一部4章（通し4）"></span><span class="cell" title="一部5章（通し5）"></span><span class="cell" title="一部6章（通し6）"></span></div></td><td class="mcell"><div class="strip"><span class="cell" title="二部1章（通し7）"></span><span class="cell" title="二部2章（通し8）"></span><span class="cell" title="二部3章（通し9）"></span><span class="cell" title="二部4章（通し10）"></span><span class="cell" title="二部5章（通し11）"></span><span class="cell" title="二部6章（通し12）"></span></div></td><td class="mcell"><div class="strip"><span class="cell" title="三部1章（通し13）"></span><span class="cell" title="三部2章（通し14）"></span><span class="cell" title="三部3章（通し15）"></span><span class="cell on first" title="三部4章（通し16） 庇って救う">初</span><span class="cell on" title="三部5章（通し17） 一緒に帰る"></span><span class="cell on" title="三部6章（通し18）"></span><span class="cell on" title="三部7章（通し19）"></span></div></td><td class="mcell"><div class="strip"><span class="cell on" title="四部1章（通し20） 育った姿"></span><span class="cell" title="四部2章（通し21）"></span><span class="cell on" title="四部3章（通し22）"></span><span class="cell on" title="四部4章（通し23）"></span><span class="cell on" title="四部5章（通し24） 道を開く（止め手にしない）"></span><span class="cell on" title="四部6章（通し25） 手渡し"></span></div></td>
+  <td class="mrole">テラ←ガルドの繰り返しを他人の子へ渡す相手。止め手にはしない（主要人物）<span class="mappear">三部4章（初）〜7章／四部1章・3〜6章</span></td>
+</tr><tr data-char="N-05" class="t-new">
+  <th scope="row"><button type="button" class="mname" data-char="N-05"><span class="cid">N-05</span><span class="cname">テラとエリーネの子</span></button><span class="tier">新規 N</span></th>
+  <td class="mcell"><div class="strip"><span class="cell" title="一部1章（通し1）"></span><span class="cell" title="一部2章（通し2）"></span><span class="cell" title="一部3章（通し3）"></span><span class="cell" title="一部4章（通し4）"></span><span class="cell" title="一部5章（通し5）"></span><span class="cell" title="一部6章（通し6）"></span></div></td><td class="mcell"><div class="strip"><span class="cell" title="二部1章（通し7）"></span><span class="cell" title="二部2章（通し8）"></span><span class="cell" title="二部3章（通し9）"></span><span class="cell" title="二部4章（通し10）"></span><span class="cell" title="二部5章（通し11）"></span><span class="cell" title="二部6章（通し12）"></span></div></td><td class="mcell"><div class="strip"><span class="cell" title="三部1章（通し13）"></span><span class="cell" title="三部2章（通し14）"></span><span class="cell on first" title="三部3章（通し15） 誕生">初</span><span class="cell" title="三部4章（通し16）"></span><span class="cell on" title="三部5章（通し17） 帰宅の場面・一〜二歳"></span><span class="cell" title="三部6章（通し18）"></span><span class="cell on" title="三部7章（通し19） 帰還を迎える"></span></div></td><td class="mcell"><div class="strip"><span class="cell on" title="四部1章（通し20） 六歳"></span><span class="cell" title="四部2章（通し21）"></span><span class="cell" title="四部3章（通し22）"></span><span class="cell" title="四部4章（通し23）"></span><span class="cell" title="四部5章（通し24）"></span><span class="cell on" title="四部6章（通し25） 七〜八歳"></span></div></td>
+  <td class="mrole">帰りを待つ側の実体。「死んで救う」を選ばない理由の顔（サブ→キーパーソン）<span class="mappear">三部3章（誕生）／5章（帰宅）／7章（帰還）／四部1・6章</span></td>
+</tr><tr data-char="N-06" class="t-major">
+  <th scope="row"><button type="button" class="mname" data-char="N-06"><span class="cid">N-06</span><span class="cname">挫折相手（人間の法術使い）</span></button><span class="tier">主要人物</span></th>
+  <td class="mcell"><div class="strip"><span class="cell" title="一部1章（通し1）"></span><span class="cell" title="一部2章（通し2）"></span><span class="cell" title="一部3章（通し3）"></span><span class="cell on first" title="一部4章（通し4）">初</span><span class="cell" title="一部5章（通し5）"></span><span class="cell" title="一部6章（通し6）"></span></div></td><td class="mcell"><div class="strip"><span class="cell" title="二部1章（通し7）"></span><span class="cell" title="二部2章（通し8）"></span><span class="cell" title="二部3章（通し9）"></span><span class="cell" title="二部4章（通し10）"></span><span class="cell" title="二部5章（通し11）"></span><span class="cell" title="二部6章（通し12）"></span></div></td><td class="mcell"><div class="strip"><span class="cell" title="三部1章（通し13）"></span><span class="cell" title="三部2章（通し14）"></span><span class="cell" title="三部3章（通し15）"></span><span class="cell on kari" title="三部4章（通し16） 味方の法術隊として一度 【仮】"></span><span class="cell" title="三部5章（通し17）"></span><span class="cell" title="三部6章（通し18）"></span><span class="cell" title="三部7章（通し19）"></span></div></td><td class="mcell"><div class="strip"><span class="cell" title="四部1章（通し20）"></span><span class="cell" title="四部2章（通し21）"></span><span class="cell" title="四部3章（通し22）"></span><span class="cell" title="四部4章（通し23）"></span><span class="cell on kari" title="四部5章（通し24） 止め手の一人 【仮】"></span><span class="cell" title="四部6章（通し25）"></span></div></td>
+  <td class="mrole">憧れの対象そのものに敗れる壁。黒幕と別人・組織と無関係（主要人物・2026-08-30 作者決定で昇格）<span class="mappear">一部4章／三部4章【仮】（味方の法術隊として一度）／四部5章【仮】（止め手の一人）</span></td>
+</tr><tr data-char="N-07" class="t-new">
+  <th scope="row"><button type="button" class="mname" data-char="N-07"><span class="cid">N-07</span><span class="cname">学閥の指導者（善意の改革者）</span></button><span class="tier">新規 N</span></th>
+  <td class="mcell"><div class="strip"><span class="cell" title="一部1章（通し1）"></span><span class="cell" title="一部2章（通し2）"></span><span class="cell" title="一部3章（通し3）"></span><span class="cell" title="一部4章（通し4）"></span><span class="cell" title="一部5章（通し5）"></span><span class="cell on first" title="一部6章（通し6） 遠景">初</span></div></td><td class="mcell"><div class="strip"><span class="cell" title="二部1章（通し7）"></span><span class="cell" title="二部2章（通し8）"></span><span class="cell" title="二部3章（通し9）"></span><span class="cell" title="二部4章（通し10）"></span><span class="cell" title="二部5章（通し11）"></span><span class="cell" title="二部6章（通し12）"></span></div></td><td class="mcell"><div class="strip"><span class="cell" title="三部1章（通し13）"></span><span class="cell" title="三部2章（通し14）"></span><span class="cell" title="三部3章（通し15）"></span><span class="cell on kari" title="三部4章（通し16） 前線の指揮 【仮】"></span><span class="cell" title="三部5章（通し17）"></span><span class="cell" title="三部6章（通し18）"></span><span class="cell" title="三部7章（通し19）"></span></div></td><td class="mcell"><div class="strip"><span class="cell" title="四部1章（通し20）"></span><span class="cell on kari" title="四部2章（通し21） 議会 【仮】"></span><span class="cell" title="四部3章（通し22）"></span><span class="cell" title="四部4章（通し23）"></span><span class="cell" title="四部5章（通し24）"></span><span class="cell" title="四部6章（通し25）"></span></div></td>
+  <td class="mrole">法術で覆おうとして剣側と噛み合わない。善意由来の欠け（キーパーソン）<span class="mappear">一部6章（遠景）／三部4章【仮】／四部2章（議会）【仮】</span></td>
+</tr><tr data-char="N-08" class="t-new">
+  <th scope="row"><button type="button" class="mname" data-char="N-08"><span class="cid">N-08</span><span class="cname">仕事師（幹部の下の実務者）</span></button><span class="tier">新規 N</span></th>
+  <td class="mcell"><div class="strip"><span class="cell" title="一部1章（通し1）"></span><span class="cell" title="一部2章（通し2）"></span><span class="cell" title="一部3章（通し3）"></span><span class="cell" title="一部4章（通し4）"></span><span class="cell" title="一部5章（通し5）"></span><span class="cell" title="一部6章（通し6）"></span></div></td><td class="mcell"><div class="strip"><span class="cell" title="二部1章（通し7）"></span><span class="cell" title="二部2章（通し8）"></span><span class="cell" title="二部3章（通し9）"></span><span class="cell" title="二部4章（通し10）"></span><span class="cell" title="二部5章（通し11）"></span><span class="cell" title="二部6章（通し12）"></span></div></td><td class="mcell"><div class="strip"><span class="cell" title="三部1章（通し13）"></span><span class="cell" title="三部2章（通し14）"></span><span class="cell" title="三部3章（通し15）"></span><span class="cell" title="三部4章（通し16）"></span><span class="cell" title="三部5章（通し17）"></span><span class="cell on" title="三部6章（通し18） 待ち伏せの影"></span><span class="cell on first" title="三部7章（通し19） 姿を見せる・交戦">初</span></div></td><td class="mcell"><div class="strip"><span class="cell" title="四部1章（通し20）"></span><span class="cell" title="四部2章（通し21）"></span><span class="cell on" title="四部3章（通し22） 交戦"></span><span class="cell" title="四部4章（通し23）"></span><span class="cell" title="四部5章（通し24）"></span><span class="cell" title="四部6章（通し25）"></span></div></td>
+  <td class="mrole">倒しても芯に届かない敵の器を人の形で見せる。誘引の指紋の運び手（キーパーソン）<span class="mappear">二部3・6章（指紋のみ）／三部6〜7章（姿・交戦）／四部3章</span></td>
+</tr><tr data-char="N-09" class="t-new">
+  <th scope="row"><button type="button" class="mname" data-char="N-09"><span class="cid">N-09</span><span class="cname">名のある魔王（破局の張本人）</span></button><span class="tier">新規 N</span></th>
+  <td class="mcell"><div class="strip"><span class="cell" title="一部1章（通し1）"></span><span class="cell" title="一部2章（通し2）"></span><span class="cell" title="一部3章（通し3）"></span><span class="cell" title="一部4章（通し4）"></span><span class="cell" title="一部5章（通し5）"></span><span class="cell" title="一部6章（通し6）"></span></div></td><td class="mcell"><div class="strip"><span class="cell" title="二部1章（通し7）"></span><span class="cell" title="二部2章（通し8）"></span><span class="cell" title="二部3章（通し9）"></span><span class="cell" title="二部4章（通し10）"></span><span class="cell" title="二部5章（通し11）"></span><span class="cell" title="二部6章（通し12）"></span></div></td><td class="mcell"><div class="strip"><span class="cell" title="三部1章（通し13）"></span><span class="cell" title="三部2章（通し14）"></span><span class="cell on first kari" title="三部3章（通し15） 名が立つ 【仮】">初</span><span class="cell" title="三部4章（通し16）"></span><span class="cell" title="三部5章（通し17）"></span><span class="cell on" title="三部6章（通し18） 都市を落とす（遠景）"></span><span class="cell on death" title="三部7章（通し19） 討たれる">†</span></div></td><td class="mcell"><div class="strip"><span class="cell" title="四部1章（通し20）"></span><span class="cell" title="四部2章（通し21）"></span><span class="cell" title="四部3章（通し22）"></span><span class="cell" title="四部4章（通し23）"></span><span class="cell" title="四部5章（通し24）"></span><span class="cell" title="四部6章（通し25）"></span></div></td>
+  <td class="mrole">完成した魔剣の初仕事。テラの継承者名の元。討っても波は止まらない（キーパーソン・敵）<span class="mappear">三部3章（名が立つ）／6章（都市を落とす）／7章（討たれる） ／ 三部7章 討たれる</span></td>
+</tr><tr data-char="N-10" class="t-new">
+  <th scope="row"><button type="button" class="mname" data-char="N-10"><span class="cid">N-10</span><span class="cname">対比人物（今を生きられない者・月華流）</span></button><span class="tier">新規 N</span></th>
+  <td class="mcell"><div class="strip"><span class="cell" title="一部1章（通し1）"></span><span class="cell" title="一部2章（通し2）"></span><span class="cell" title="一部3章（通し3）"></span><span class="cell" title="一部4章（通し4）"></span><span class="cell" title="一部5章（通し5）"></span><span class="cell" title="一部6章（通し6）"></span></div></td><td class="mcell"><div class="strip"><span class="cell" title="二部1章（通し7）"></span><span class="cell" title="二部2章（通し8）"></span><span class="cell on first kari" title="二部3章（通し9） 月華流の剣士 【仮】">初</span><span class="cell" title="二部4章（通し10）"></span><span class="cell" title="二部5章（通し11）"></span><span class="cell" title="二部6章（通し12）"></span></div></td><td class="mcell"><div class="strip"><span class="cell" title="三部1章（通し13）"></span><span class="cell on kari" title="三部2章（通し14） 再会 【仮】"></span><span class="cell" title="三部3章（通し15）"></span><span class="cell on kari" title="三部4章（通し16） 志願隊の中に見える 【仮】"></span><span class="cell" title="三部5章（通し17）"></span><span class="cell on death" title="三部6章（通し18） 都市の門の内側で死ぬ">†</span><span class="cell" title="三部7章（通し19）"></span></div></td><td class="mcell"><div class="strip"><span class="cell" title="四部1章（通し20）"></span><span class="cell" title="四部2章（通し21）"></span><span class="cell" title="四部3章（通し22）"></span><span class="cell" title="四部4章（通し23）"></span><span class="cell" title="四部5章（通し24）"></span><span class="cell" title="四部6章（通し25）"></span></div></td>
+  <td class="mrole">過去の栄光にすがる剣士。テーマの対位を近くの人物で担う（キーパーソン）<span class="mappear">二部3章【仮】／三部2・4章【仮】／三部6章 ／ 三部6章 死亡（落ちる都市）【確定方向】</span></td>
+</tr><tr data-char="N-14" class="t-new">
+  <th scope="row"><button type="button" class="mname" data-char="N-14"><span class="cid">N-14</span><span class="cname">先を行く人（ガルドとは別の憧れの対象者）</span></button><span class="tier">新規 N</span></th>
+  <td class="mcell"><div class="strip"><span class="cell" title="一部1章（通し1）"></span><span class="cell" title="一部2章（通し2）"></span><span class="cell" title="一部3章（通し3）"></span><span class="cell" title="一部4章（通し4）"></span><span class="cell" title="一部5章（通し5）"></span><span class="cell" title="一部6章（通し6）"></span></div></td><td class="mcell"><div class="strip"><span class="cell" title="二部1章（通し7）"></span><span class="cell" title="二部2章（通し8）"></span><span class="cell" title="二部3章（通し9）"></span><span class="cell" title="二部4章（通し10）"></span><span class="cell" title="二部5章（通し11）"></span><span class="cell" title="二部6章（通し12）"></span></div></td><td class="mcell"><div class="strip"><span class="cell" title="三部1章（通し13）"></span><span class="cell" title="三部2章（通し14）"></span><span class="cell" title="三部3章（通し15）"></span><span class="cell" title="三部4章（通し16）"></span><span class="cell" title="三部5章（通し17）"></span><span class="cell" title="三部6章（通し18）"></span><span class="cell" title="三部7章（通し19）"></span></div></td><td class="mcell"><div class="strip"><span class="cell" title="四部1章（通し20）"></span><span class="cell" title="四部2章（通し21）"></span><span class="cell" title="四部3章（通し22）"></span><span class="cell" title="四部4章（通し23）"></span><span class="cell" title="四部5章（通し24）"></span><span class="cell" title="四部6章（通し25）"></span></div></td>
+  <td class="mrole">ガルドとは別の憧れの対象者。人物像・登場位置は【未定】。候補3案: 学院で先を行く生徒／討魔院の若い上澄み／勇者の会の少年兵の先輩（主要人物〜キーパーソン・作者と決める）<span class="mappear">登場位置【未定】（章の升は空）</span></td>
+</tr><tr data-char="N-15" class="t-new">
+  <th scope="row"><button type="button" class="mname" data-char="N-15"><span class="cid">N-15</span><span class="cname">学院の教師（テラを教える側）</span></button><span class="tier">新規 N</span></th>
+  <td class="mcell"><div class="strip"><span class="cell" title="一部1章（通し1）"></span><span class="cell" title="一部2章（通し2）"></span><span class="cell" title="一部3章（通し3）"></span><span class="cell on first kari" title="一部4章（通し4） 学院の教師 【仮】">初</span><span class="cell" title="一部5章（通し5）"></span><span class="cell" title="一部6章（通し6）"></span></div></td><td class="mcell"><div class="strip"><span class="cell" title="二部1章（通し7）"></span><span class="cell" title="二部2章（通し8）"></span><span class="cell" title="二部3章（通し9）"></span><span class="cell" title="二部4章（通し10）"></span><span class="cell" title="二部5章（通し11）"></span><span class="cell" title="二部6章（通し12）"></span></div></td><td class="mcell"><div class="strip"><span class="cell" title="三部1章（通し13）"></span><span class="cell" title="三部2章（通し14）"></span><span class="cell" title="三部3章（通し15）"></span><span class="cell" title="三部4章（通し16）"></span><span class="cell" title="三部5章（通し17）"></span><span class="cell" title="三部6章（通し18）"></span><span class="cell" title="三部7章（通し19）"></span></div></td><td class="mcell"><div class="strip"><span class="cell" title="四部1章（通し20）"></span><span class="cell" title="四部2章（通し21）"></span><span class="cell" title="四部3章（通し22）"></span><span class="cell" title="四部4章（通し23）"></span><span class="cell" title="四部5章（通し24）"></span><span class="cell" title="四部6章（通し25）"></span></div></td>
+  <td class="mrole">法術院の学院で法術を教える。テラの灯器の天井を最初に言葉にする人【仮】（キーパーソン）<span class="mappear">一部4章【仮】</span></td>
+</tr><tr data-char="N-16" class="t-new">
+  <th scope="row"><button type="button" class="mname" data-char="N-16"><span class="cid">N-16</span><span class="cname">学院の同い年の貴族の生徒</span></button><span class="tier">新規 N</span></th>
+  <td class="mcell"><div class="strip"><span class="cell" title="一部1章（通し1）"></span><span class="cell" title="一部2章（通し2）"></span><span class="cell" title="一部3章（通し3）"></span><span class="cell on first kari" title="一部4章（通し4） 学院の貴族の生徒 【仮】">初</span><span class="cell" title="一部5章（通し5）"></span><span class="cell" title="一部6章（通し6）"></span></div></td><td class="mcell"><div class="strip"><span class="cell" title="二部1章（通し7）"></span><span class="cell" title="二部2章（通し8）"></span><span class="cell" title="二部3章（通し9）"></span><span class="cell" title="二部4章（通し10）"></span><span class="cell" title="二部5章（通し11）"></span><span class="cell" title="二部6章（通し12）"></span></div></td><td class="mcell"><div class="strip"><span class="cell" title="三部1章（通し13）"></span><span class="cell" title="三部2章（通し14）"></span><span class="cell" title="三部3章（通し15）"></span><span class="cell" title="三部4章（通し16）"></span><span class="cell" title="三部5章（通し17）"></span><span class="cell" title="三部6章（通し18）"></span><span class="cell" title="三部7章（通し19）"></span></div></td><td class="mcell"><div class="strip"><span class="cell" title="四部1章（通し20）"></span><span class="cell" title="四部2章（通し21）"></span><span class="cell" title="四部3章（通し22）"></span><span class="cell" title="四部4章（通し23）"></span><span class="cell" title="四部5章（通し24）"></span><span class="cell" title="四部6章（通し25）"></span></div></td>
+  <td class="mrole">環境の対比（灯が水路になる側）。敵意でなく「同じ年で世界の広さが違う」の対比を軸に【仮】（サブ〜キーパーソン）<span class="mappear">一部4章【仮】</span></td>
+</tr><tr data-char="N-17" class="t-new">
+  <th scope="row"><button type="button" class="mname" data-char="N-17"><span class="cid">N-17</span><span class="cname">学院の同い年の平民の生徒</span></button><span class="tier">新規 N</span></th>
+  <td class="mcell"><div class="strip"><span class="cell" title="一部1章（通し1）"></span><span class="cell" title="一部2章（通し2）"></span><span class="cell" title="一部3章（通し3）"></span><span class="cell on first kari" title="一部4章（通し4） 学院の平民の生徒 【仮】">初</span><span class="cell" title="一部5章（通し5）"></span><span class="cell" title="一部6章（通し6）"></span></div></td><td class="mcell"><div class="strip"><span class="cell" title="二部1章（通し7）"></span><span class="cell" title="二部2章（通し8）"></span><span class="cell" title="二部3章（通し9）"></span><span class="cell" title="二部4章（通し10）"></span><span class="cell" title="二部5章（通し11）"></span><span class="cell" title="二部6章（通し12）"></span></div></td><td class="mcell"><div class="strip"><span class="cell" title="三部1章（通し13）"></span><span class="cell" title="三部2章（通し14）"></span><span class="cell" title="三部3章（通し15）"></span><span class="cell" title="三部4章（通し16）"></span><span class="cell" title="三部5章（通し17）"></span><span class="cell" title="三部6章（通し18）"></span><span class="cell" title="三部7章（通し19）"></span></div></td><td class="mcell"><div class="strip"><span class="cell" title="四部1章（通し20）"></span><span class="cell" title="四部2章（通し21）"></span><span class="cell" title="四部3章（通し22）"></span><span class="cell" title="四部4章（通し23）"></span><span class="cell" title="四部5章（通し24）"></span><span class="cell" title="四部6章（通し25）"></span></div></td>
+  <td class="mrole">テラと同じ側から学院に入った子（年季奉公か王費か【仮】）。対比の三角形の第三点（サブ〜キーパーソン）<span class="mappear">一部4章【仮】</span></td>
+</tr></tbody>
+      </table>
+    </div>
+    <div class="mlegend">
+      <span class="g"><span class="cell on"></span> 登場</span>
+      <span class="g"><span class="cell on first">初</span> 初登場</span>
+      <span class="g"><span class="cell on death">†</span> 死亡</span>
+      <span class="g"><span class="cell on exit">退</span> 退場</span>
+      <span class="g"><span class="cell on kari"></span> 仮置きの登場</span>
+      <span class="g">升は背骨 §2 の章ごとの登場欄から起こした。§4 の「登場する部・章」と細部が違う行は右の文を正とする。</span>
+    </div>
+  </div>
+</section>
+
+<section class="sec" id="kari">
+  <div class="wrap">
+    <h2>【仮】一覧と作者判断の候補</h2>
+    <p class="lead">背骨が正典の沈黙を埋めるために仮置きしたもののうち、まだ作者判断が残っている17件。番号はこの表の中だけの通し番号。</p>
+    <div class="scroll">
+      <table class="kari-table">
+        <thead><tr><th>#</th><th>仮置き</th><th>なぜそう置いたか</th><th>代替案</th></tr></thead>
+        <tbody><tr><td>1</td><td>三部・四部の章題（隣にいる／拠点／のろし／開戦と再会／一度だけ帰る／落ちる都市／名のある魔王／兆しを読む者／二つの火／一斉回収／故郷の廃墟／実り／庭と書付）</td><td>章の核の事件を一語で指す仮題</td><td>各部エージェントが付け直してよい</td></tr><tr><td>2</td><td>一部4章の学院への入り方＝勇者の会の少年兵として雑用の縁で出入り（正規の生徒ではない）</td><td>「平民と貴族の環境の対比」を外から見る目になる</td><td>年季奉公／王費で正規に入る</td></tr><tr><td>3</td><td>一部4章の学習経路の副次＝法具工房の職人（c-017 の表の顔）</td><td>「職業の場で無害な顔で一度通る」の D の分が一部で済み、結界灯技術の出どころとも一本になる</td><td>二部の拠点の町の工房で通る／副次を置かない</td></tr><tr><td>4</td><td>一部4章の敗北の状況＝懸賞金の取り合いで法術使いの一党と鉢合わせ</td><td>会の腐敗（金で動く）と憧れの対象の両方を一つの現場で見せられる</td><td>討伐現場の手柄争い／護衛任務で相手側の雇われ法術使い</td></tr><tr><td>5</td><td>c-003 の勧誘の影＝一部4〜5章。再合流＝二部3章</td><td>「第一部で勧誘・二部途中からそばで手伝う」の正典に収まる最小の置き方</td><td>勧誘は一部6章の混乱の中／再合流は二部4章</td></tr><tr><td>6</td><td>F-002 表層回収（点灯夫の証言）＝二部3章</td><td>故郷方面の任・孤児院再訪と同じ章で、故郷の糸が一本にまとまる</td><td>二部2章（再会の現場の近く）／二部4章</td></tr><tr><td>7</td><td>対比人物 N-10 の初出＝二部3章、再登場＝三部2章</td><td>遍歴で出会い、家を持った後に再会させると「今を生きる側に立った」対比が立つ</td><td>三部前半だけに置く／討魔院の同僚にする</td></tr><tr><td>8</td><td>名のある魔王の名が立つ＝三部3章末</td><td>のろしの章の結びに名が立つと、後半の顔が読者に見える</td><td>三部4章の前線で初めて名が立つ</td></tr><tr><td>9</td><td>N-06 が三部4章に味方の法術隊として一度・四部5章に止め手の一人として出る</td><td>主要人物に上がった壁の人物を、一部・三部・四部で一度ずつ通す</td><td>三部4章だけ／四部5章は出さない</td></tr><tr><td>10</td><td>N-14 先を行く人の人物像と登場位置</td><td>候補3案: 学院で先を行く生徒（一部4章初出）／討魔院の若い上澄み（二部1章初出）／勇者の会の少年兵の先輩（一部3章初出）</td><td>作者と決める（【未定】）</td></tr><tr><td>11</td><td>F-006 の回収位置＝四部5章（災厄が立ち、一太刀の場面）</td><td>「騎士の最後の一振り」の符合が一太刀と重なる</td><td>四部4章末（庭師の最期）／三部7章（名のある魔王を討つ場面）</td></tr><tr><td>12</td><td>幹部三人の個別の結末（A 孤児院／B 失脚／D 庭）</td><td>一斉回収は判明が同時。処遇は分けた方が章の密度が出る</td><td>三人とも庭に集める（一室に揃う画）</td></tr><tr><td>13</td><td>四部1章で c-020 がガルドの死を知る場面を置く</td><td>c-020 シートの設計候補どおり。弔いと継承を一場面で兼ねる</td><td>手紙で既に知っている</td></tr><tr><td>14</td><td>一部5章の章末＝魔物の目撃増加の報せ</td><td>大襲撃の前触れを部の後半へ橋渡し</td><td>兄姉の町を発つ朝の余韻（章末は事件の断面が正典のため優先度低）</td></tr><tr><td>15</td><td>二部6章の拠点の町＝三部の家と同じ町</td><td>「拠点＝三部の一度だけ帰る家の実体」の正典と一本</td><td>三部1章で新しい町へ移る</td></tr><tr><td>16</td><td>兄姉・ロルフ・ニコの再登場（三部2章の式・四部6章の戦後）</td><td>生涯の少数の系譜を戦後に一度揃える</td><td>再登場なし（一部だけの人物に留める）</td></tr><tr><td>17</td><td>N-04 の初出年齢＝10〜12歳（四部で15〜17歳【仮】）</td><td>廃墟のテラと同じ年頃で拾われ、四部で戦える年齢になる</td><td>8歳前後（四部でまだ少年）</td></tr></tbody>
+      </table>
+    </div>
+    <div class="open">
+      <div class="panel">
+        <h3>作者決定で解消（2026-08-30・08-31）</h3>
+        <ul><li>三部は7章、他の部は6章（全25章）。三部は 4章「開戦と再会」／5章「一度だけ帰る」／6章「落ちる都市」／7章「名のある魔王」。ほぼ確定・途中で戻す可能性あり。</li><li>N-06 挫折相手は主要人物（N-02・N-03・N-04 と合わせて主要人物は計10人）。ガルドとは別の「先を行く人」N-14 を新設（人物像・登場位置は【未定】）。</li><li>N-03 討魔院の仲間＝三部の「もう一人の容疑者」・四部の止め手【確定方向】。</li><li>N-10 対比人物の結末＝三部6章「落ちる都市」で死ぬ【確定方向】。</li><li>一部4章の学習経路の一つ＝法術院（同じ町の学院）で法術を学ぶ。学院の生徒（貴族 N-16・平民 N-17）と教師 N-15 との関係を築き、平民と貴族の環境の対比を描く。法具工房の職人（c-017）経由は副次【仮】。</li><li>一部6章＝ガルドは奥義を使い、締めの一手で大狼を討ち、灯を燃やし尽くして死ぬ。大狼を討っても後続の魔物が押し寄せて撤退。遺体も遺品も持ち帰れない（墓がない。四部1章の弔いは遺体のない弔い）。</li><li>F-002 裏層の最後のピースの運び手＝c-012 オスカ／両教の任命式と議会の場＝アコルダ／三部末→四部の跳び＝約3年（2026-08-31 圧縮。四部開幕テラ28歳・子6歳）。いずれも【確定方向】。</li><li>時系列の圧縮: 一部末13歳・二部末19歳・結婚21歳・三部末25歳・跳び約3年・四部開幕28歳。三部1章は平凡に付き合い始め、2章で求婚→結婚、3章で子の誕生→動員→章末にのろし（D-20260831-plot-8）。</li></ul>
+        <p class="note">上の表から外した分の、いまの決まりごと。正典への反映は MEMORY.md「巻別プロットと部構成」と ANSWERS.md（D-20260830-plot-1〜7・D-20260831-plot-8）。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer id="pointer">
+  <div class="wrap">
+    <h2>正典ポインタ</h2>
+    <ul>
+      <li><code>.claude/MEMORY.md</code>——確定設定の正典（最終権威）</li>
+      <li><code>設計/プロット/_index.md</code>——時系列の概要・ファイル地図</li>
+      <li><code>設計/プロット/巻別/</code>——第一部_少年期／第二部_青年期前半／第三部_青年期後半／第四部_壮年期（2026-08-30 起草・PROPOSED）</li>
+      <li><code>設計/プロット/全体/伏線管理.md</code>——F-001〜F-012 の正本</li>
+      <li><code>設計/プロット/全体/アウトライン.md</code>・<code>テーマ.md</code>——四部の器・テーマ</li>
+      <li><code>設計/プロット/全体/クライマックス逆算設計.md</code>——四部の決着（§4・§1-24 は旧記）</li>
+      <li><code>設計/プロット/事件設計/中盤の波設計.md</code>——二部・三部の山場（2026-08-14 改訂注記）</li>
+      <li><code>設計/キャラクター/_index.md</code>——c-ID 一覧</li>
+      <li><code>設計/世界/歴史/暦と年表.md</code>——オーデリア暦の錨</li>
+      <li><code>素材/参照/物語ダイジェスト.md</code>——非正典の早見</li>
+      <li><code>素材/ノート/2026-08-30_全体時系列_背骨.md</code>——この図のデータの正本（非正典）</li>
+      <li><code>素材/参照/年表/gen_timeline.mjs</code>——この図の生成器（データを直して再生成する）</li>
+    </ul>
+    <p>この図は非正典の早見。正典は <code>.claude/MEMORY.md</code> と <code>設計/</code>。生成日 2026-08-31。データの正本は全体時系列の背骨と <code>設計/プロット/巻別/</code> で、二〜四部の章題・N-ID の仮呼称は【仮】。食い違ったら正典が勝つ。</p>
+  </div>
+</footer>
+
+<script>
+(function(){
+  var NAMES = {"c-001":"テラベール","c-002":"ガルド","c-003":"友人【名未定】","c-004":"エリーネ","c-005":"ロルフ","c-006":"ニコ","c-007":"ネル","c-008":"ヴァルデン","c-009":"セップ","c-010":"ホルツ","c-011":"ヨナス（法術師）","c-012":"オスカ（側近・恩義）","c-013":"リヴェル（側近・学徒）","c-014":"庭師【名未定】","c-015":"皆救い【名未定】","c-016":"時止まりの王【名未定】","c-017":"育ての親【名未定】","c-018":"戦友【名未定】","c-019":"継ぎ火の同僚【名未定】","c-020":"継承者【名未定】","N-01":"兄姉（兄と姉・二人一組）","N-02":"討魔院の長（正論の人）","N-03":"討魔院の仲間（終盤まで共にする）","N-04":"次世代の少年兵（継承の相手）","N-05":"テラとエリーネの子","N-06":"挫折相手（人間の法術使い）","N-07":"学閥の指導者（善意の改革者）","N-08":"仕事師（幹部の下の実務者）","N-09":"名のある魔王（破局の張本人）","N-10":"対比人物（今を生きられない者・月華流）","N-14":"先を行く人（ガルドとは別の憧れの対象者）","N-15":"学院の教師（テラを教える側）","N-16":"学院の同い年の貴族の生徒","N-17":"学院の同い年の平民の生徒"};
+  var FNAMES = {"F-001":"真の動機＝人を救うこと（本人未自覚）","F-002":"崩壊の真相は二層","F-003":"大襲撃の原因＝裏組織の作為","F-004":"救うことでしか自分を許せない（後天の変質）","F-005":"半年の空白","F-006":"童話の一節が真相と符合","F-007":"盗み切れなかった最後の一手","F-008":"第一部の仲間との前線再会","F-009":"法術への憧れの品","F-010":"側近の獣の強い一筆","F-011":"少年期の縁の場所（ハルベック近郊の山野）","F-012":"死体場面の四つの指紋"};
+  var cards = Array.prototype.slice.call(document.querySelectorAll('.ch[data-ch]'));
+  var partBlocks = Array.prototype.slice.call(document.querySelectorAll('.part[data-part], .band[data-part]'));
+  var jump = document.getElementById('jump');
+  var pfButtons = Array.prototype.slice.call(document.querySelectorAll('.pf button'));
+  var hlbar = document.getElementById('hlbar');
+  var hltext = document.getElementById('hltext');
+  var hlcount = document.getElementById('hlcount');
+  var clearBtn = document.getElementById('hlclear');
+  var state = { part: 'all', hl: null };
+
+  function has(list, id){ return (' ' + (list || '') + ' ').indexOf(' ' + id + ' ') >= 0; }
+  function matches(card){
+    if (!state.hl) return true;
+    if (state.hl.type === 'char') return has(card.getAttribute('data-chars'), state.hl.id);
+    return has(card.getAttribute('data-fs'), state.hl.id);
+  }
+  function partOk(p){ return state.part === 'all' || String(p) === state.part; }
+
+  function apply(){
+    var n = 0;
+    cards.forEach(function(card){
+      var ok = partOk(card.getAttribute('data-part'));
+      card.hidden = !ok;
+      var m = matches(card);
+      card.classList.toggle('dim', !!state.hl && !m);
+      card.classList.toggle('hit', !!state.hl && m);
+      if (ok && m && state.hl) n++;
+    });
+    partBlocks.forEach(function(el){ el.hidden = !partOk(el.getAttribute('data-part')); });
+    if (jump) jump.hidden = !(state.part === 'all' || state.part === '3' || state.part === '4');
+    pfButtons.forEach(function(b){ b.setAttribute('aria-pressed', b.getAttribute('data-part') === state.part ? 'true' : 'false'); });
+
+    // pressed state on chips / badges / rows
+    var hl = state.hl;
+    Array.prototype.forEach.call(document.querySelectorAll('[data-char]'), function(el){
+      var on = !!hl && hl.type === 'char' && el.getAttribute('data-char') === hl.id;
+      if (el.tagName === 'BUTTON') el.setAttribute('aria-pressed', on ? 'true' : 'false');
+      el.classList.toggle('hit', on);
+    });
+    Array.prototype.forEach.call(document.querySelectorAll('[data-f]'), function(el){
+      var on = !!hl && hl.type === 'f' && el.getAttribute('data-f') === hl.id;
+      if (el.tagName === 'BUTTON') el.setAttribute('aria-pressed', on ? 'true' : 'false');
+      el.classList.toggle('hit', on);
+    });
+
+    if (hl){
+      hlbar.hidden = false;
+      hltext.textContent = hl.type === 'char' ? (hl.id + ' ' + (NAMES[hl.id] || '')) : (hl.id + ' ' + (FNAMES[hl.id] || ''));
+      hlcount.textContent = '該当 ' + n + ' 章';
+    } else {
+      hlbar.hidden = true;
+    }
+  }
+
+  function toggle(type, id){
+    if (state.hl && state.hl.type === type && state.hl.id === id) state.hl = null;
+    else state.hl = { type: type, id: id };
+    apply();
+  }
+
+  document.addEventListener('click', function(ev){
+    var t = ev.target;
+    if (!(t instanceof Element)) return;
+    var b = t.closest('button[data-char]');
+    if (b){ toggle('char', b.getAttribute('data-char')); return; }
+    var f = t.closest('button[data-f]');
+    if (f){ toggle('f', f.getAttribute('data-f')); return; }
+    var row = t.closest('tr[data-char]');
+    if (row && !t.closest('a')){ toggle('char', row.getAttribute('data-char')); return; }
+    var frow = t.closest('tr[data-f]');
+    if (frow && !t.closest('a')){ toggle('f', frow.getAttribute('data-f')); return; }
+    var p = t.closest('.pf button');
+    if (p){ state.part = p.getAttribute('data-part'); apply(); return; }
+    if (t.closest('#hlclear')){ state.hl = null; apply(); }
+  });
+  document.addEventListener('keydown', function(ev){
+    if (ev.key === 'Escape' && state.hl){ state.hl = null; apply(); }
+  });
+
+  // 起動時: JS が効く印として行にカーソルを付ける
+  document.documentElement.classList.add('js');
+  apply();
+})();
+</script>
